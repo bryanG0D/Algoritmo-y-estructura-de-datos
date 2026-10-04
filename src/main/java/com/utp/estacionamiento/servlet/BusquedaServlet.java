@@ -3,7 +3,9 @@ package com.utp.estacionamiento.servlet;
 import com.google.gson.Gson;
 import com.utp.estacionamiento.util.GsonProvider;
 import com.utp.estacionamiento.estructuras.ResultadoBusquedaAVL;
+import com.utp.estacionamiento.modelo.EspacioEstacionamiento;
 import com.utp.estacionamiento.modelo.Ticket;
+import com.utp.estacionamiento.modelo.TipoVehiculo;
 import com.utp.estacionamiento.modelo.Vehiculo;
 import com.utp.estacionamiento.servicio.EstacionamientoService;
 import com.utp.estacionamiento.util.AppContextListener;
@@ -47,6 +49,14 @@ public class BusquedaServlet extends HttpServlet {
                 respuesta.put("vehiculo", vehiculo);
                 Ticket activo = servicio.buscarTicketActivoDeVehiculo(vehiculo.getIdVehiculo());
                 respuesta.put("ticketActivo", activo);
+                // Datos legibles para la ficha del vehiculo (sin mostrar ids al usuario)
+                for (TipoVehiculo t : servicio.listarTiposVehiculo()) {
+                    if (t.getIdTipo() == vehiculo.getIdTipo()) respuesta.put("nombreTipo", t.getNombre());
+                }
+                if (activo != null) {
+                    EspacioEstacionamiento espacio = servicio.getMatriz().buscarPorId(activo.getIdEspacio());
+                    if (espacio != null) respuesta.put("numeroEspacio", espacio.getNumeroEspacio());
+                }
             }
         } catch (SQLException e) {
             respuesta.put("error", "Error de base de datos: " + e.getMessage());

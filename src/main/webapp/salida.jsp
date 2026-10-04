@@ -28,6 +28,10 @@
 </main>
 <script src="js/main.js"></script>
 <script>
+// Si se llega desde la busqueda por placa (cliente sin ticket), el numero ya viene en la URL.
+const ticketUrl = new URLSearchParams(location.search).get('ticket');
+if (ticketUrl) document.getElementById('idTicket').value = ticketUrl;
+
 document.getElementById('formSalida').addEventListener('submit', function (e) {
     e.preventDefault();
     const datos = new URLSearchParams(new FormData(e.target));

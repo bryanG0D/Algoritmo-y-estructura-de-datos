@@ -76,7 +76,7 @@ public class EstacionamientoService {
 
         // 1. Busqueda O(log n) en el Arbol AVL
         boolean yaConocido = arbolPlacas.buscarPorPlaca(placa) != null;
-        String prefijo = yaConocido ? "Vehiculo reconocido (Arbol AVL). " : "Vehiculo nuevo registrado. ";
+        String prefijo = yaConocido ? "Vehiculo ya registrado. " : "Vehiculo nuevo registrado. ";
 
         // 2. Regla de compatibilidad: a que clase de espacio puede ir
         int tipoEspacio = CompatibilidadEspacio.tipoDeEspacioPara(idTipo);
@@ -98,9 +98,8 @@ public class EstacionamientoService {
                 resultado.asignado = true;
                 resultado.idTicket = r.getIdTicket();
                 resultado.numeroEspacio = espacio.getNumeroEspacio();
-                resultado.mensaje = prefijo + "Espacio " + espacio.getNumeroEspacio()
-                        + " asignado (fila " + espacio.getFila()
-                        + ", la que tenia mas lugares libres).";
+                resultado.mensaje = prefijo + "Asigne el espacio " + espacio.getNumeroEspacio()
+                        + " (fila " + espacio.getFila() + ").";
                 return resultado;
             }
             matriz.actualizarEstado(espacio.getIdEspacio(), "OCUPADO");

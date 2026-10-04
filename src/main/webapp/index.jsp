@@ -35,20 +35,24 @@
 
     <section class="columnas-inicio">
         <div class="caja">
-            <h2>Matriz 5 x 10</h2>
+            <h2>Ocupacion del estacionamiento</h2>
             <div id="miniMapa"></div>
             <p class="nota">
                 <span class="celda libre"></span> Libre
                 <span class="celda ocupado"></span> Ocupado
                 &nbsp; Columna 10 (borde azul): motos y bicicletas
             </p>
+            <a href="mapa.jsp">Ver mapa completo &rarr;</a>
         </div>
         <div class="caja">
-            <h2>Arbol AVL de placas</h2>
-            <p><span class="dato-avl" id="placasEnArbol">-</span> placas indexadas</p>
-            <p><span class="dato-avl" id="alturaArbol">-</span> de altura (minimo posible: <span id="alturaMinima">-</span>)</p>
-            <p class="nota" id="explicacionAvl"></p>
-            <a href="busqueda.jsp">Probar una busqueda &rarr;</a>
+            <h2>Buscar vehiculo por placa</h2>
+            <p class="nota">Para clientes que perdieron su ticket o para ubicar un vehiculo.</p>
+            <form id="formBusquedaRapida" class="busqueda-rapida">
+                <input type="text" id="placaRapida" placeholder="Ej. ABC-123" required>
+                <button type="submit">Buscar</button>
+            </form>
+            <div id="resultadoRapido"></div>
+            <p class="nota"><span id="vehiculosRegistrados">-</span> vehiculos registrados en el sistema.</p>
         </div>
     </section>
 </main>
@@ -64,14 +68,18 @@ function cargarResumen() {
             document.getElementById('estacionados').textContent = r.estacionados;
             document.getElementById('cobradoHoy').textContent =
                 r.cobradoHoy !== undefined ? 'S/ ' + Number(r.cobradoHoy).toFixed(2) : 'sin datos';
-            document.getElementById('placasEnArbol').textContent = r.placasEnArbol;
-            document.getElementById('alturaArbol').textContent = r.alturaArbol;
-            document.getElementById('alturaMinima').textContent = r.alturaMinima;
-            document.getElementById('explicacionAvl').textContent =
-                'Buscar una placa revisa como maximo ' + r.alturaArbol + ' nodos, ' +
-                'en lugar de recorrer las ' + r.placasEnArbol + ' placas una por una.';
+            document.getElementById('vehiculosRegistrados').textContent = r.placasEnArbol;
         });
 }
+
+// Busqueda rapida: usa el mismo /buscar (Arbol AVL) y muestra la ficha del vehiculo.
+document.getElementById('formBusquedaRapida').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const placa = document.getElementById('placaRapida').value.trim();
+    fetch('buscar?placa=' + encodeURIComponent(placa))
+        .then(r => r.json())
+        .then(r => { document.getElementById('resultadoRapido').innerHTML = fichaVehiculo(r); });
+});
 
 function cargarMiniMapa() {
     fetch('mapa')

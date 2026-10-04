@@ -91,10 +91,22 @@ main.panel-inicio { max-width: 1100px; }
 #miniMapa td { width: 26px; height: 20px; padding: 0; border: none; border-radius: 3px; }
 .nota { font-size: 13px; color: #64748b; }
 .nota .celda { display: inline-block; width: 12px; height: 12px; vertical-align: middle; border-radius: 2px; }
-.dato-avl { font-size: 22px; font-weight: bold; color: #2563eb; }
 
-/* Recorrido de la busqueda en el AVL */
-.panel-avl { background: #fff; border-left: 4px solid #2563eb; border-radius: 4px; padding: 8px 16px; margin-top: 16px; }
 .recorrido-avl { line-height: 2; }
 .nodo-avl { background: #e2e8f0; border-radius: 4px; padding: 2px 8px; font-family: monospace; }
 .nodo-avl.encontrado { background: #2563eb; color: #fff; }
+
+/* Busqueda rapida y ficha del vehiculo */
+.busqueda-rapida { display: flex; gap: 8px; align-items: center; }
+.busqueda-rapida input { flex: 1; margin: 0; text-transform: uppercase; }
+.busqueda-rapida button { width: auto; margin: 0; padding: 10px 18px; }
+.ficha { background: #fff; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb; border-radius: 6px; padding: 12px 16px; margin-top: 12px; }
+.ficha-placa { display: inline-block; font-family: monospace; font-size: 20px; font-weight: bold; letter-spacing: 1px;
+    border: 2px solid #1e293b; border-radius: 4px; padding: 2px 10px; margin-bottom: 6px; background: #f8fafc; }
+.ficha p { margin: 8px 0; }
+.boton { display: inline-block; background: #2563eb; color: #fff; text-decoration: none; padding: 8px 14px; border-radius: 4px; }
+.boton:hover { background: #1e4fc4; }
+
+/* Detalle tecnico plegado (para la exposicion) */
+.detalle-tecnico { margin-top: 16px; font-size: 13px; color: #475569; }
+.detalle-tecnico summary { cursor: pointer; }

@@ -23,41 +23,27 @@
 <script>
 document.getElementById('formBusqueda').addEventListener('submit', function (e) {
     e.preventDefault();
-    const placa = document.getElementById('placa').value;
+    const placa = document.getElementById('placa').value.trim();
 
     fetch('buscar?placa=' + encodeURIComponent(placa))
         .then(r => r.json())
         .then(r => {
-            const div = document.getElementById('resultado');
-            const traza = recorridoAVL(r);
-            if (!r.encontrado) {
-                div.innerHTML = '<p class="aviso">' + r.mensaje + '</p>' + traza;
-                return;
-            }
-            const v = r.vehiculo;
-            let html = '<p><strong>' + v.placa + '</strong> - ' + v.marca + ' ' + v.modelo + ' (' + v.color + ')</p>';
-            if (r.ticketActivo) {
-                html += '<p class="exito">Ticket activo #' + r.ticketActivo.idTicket +
-                    ' desde ' + r.ticketActivo.fechaHoraEntrada + '</p>';
-            } else {
-                html += '<p class="aviso">Sin ticket activo actualmente.</p>';
-            }
-            div.innerHTML = html + traza;
+            document.getElementById('resultado').innerHTML = fichaVehiculo(r) + detalleTecnico(r);
         });
 });
 
-// Muestra como bajo la busqueda por el Arbol AVL: nodos visitados y comparaciones.
-function recorridoAVL(r) {
+// Detalle tecnico plegado: como se encontro la placa en el Arbol AVL (para la exposicion).
+function detalleTecnico(r) {
     if (r.comparaciones === undefined) return '';
     const ultimo = r.recorrido.length - 1;
     const pasos = r.recorrido.map((p, i) =>
-        '<span class="nodo-avl' + (r.encontrado && i === ultimo ? ' encontrado' : '') + '">' + p + '</span>').join(' &rarr; ');
-    return '<div class="panel-avl">' +
-        '<p><strong>Arbol AVL:</strong> ' + r.comparaciones + ' comparaciones entre ' +
+        '<span class="nodo-avl' + (r.encontrado && i === ultimo ? ' encontrado' : '') + '">' + escaparHtml(p) + '</span>').join(' &rarr; ');
+    return '<details class="detalle-tecnico"><summary>Detalle tecnico de la busqueda</summary>' +
+        '<p>Busqueda en Arbol AVL: ' + r.comparaciones + ' comparaciones entre ' +
         r.totalPlacas + ' placas (altura del arbol: ' + r.alturaArbol + ').</p>' +
         '<p class="recorrido-avl">' + (pasos || 'Arbol vacio') + '</p>' +
-        '<p class="nota">Una lista recorrida de inicio a fin podria necesitar hasta ' +
-        r.totalPlacas + ' comparaciones.</p></div>';
+        '<p class="nota">Recorriendo una lista de inicio a fin podrian ser hasta ' +
+        r.totalPlacas + ' comparaciones.</p></details>';
 }
 </script>
 </body>
