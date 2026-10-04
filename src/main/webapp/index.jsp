@@ -1,10 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.utp.estacionamiento.modelo.Usuario" %>
 <%
-    if (session.getAttribute("usuario") == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
     Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
 %>
 <!DOCTYPE html>
