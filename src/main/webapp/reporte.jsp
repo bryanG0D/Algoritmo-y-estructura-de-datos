@@ -7,11 +7,10 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header class="barra-superior">
-    <h1>Reporte de ingresos</h1>
-    <a href="index.jsp" class="boton-salir">Volver</a>
-</header>
+<% String paginaActual = "reporte"; %>
+<%@ include file="/WEB-INF/menu.jspf" %>
 <main>
+    <h2 class="titulo-pagina">Reporte de ingresos</h2>
     <form id="formReporte">
         <label>Desde</label>
         <input type="date" name="fechaInicio" id="fechaInicio" required>

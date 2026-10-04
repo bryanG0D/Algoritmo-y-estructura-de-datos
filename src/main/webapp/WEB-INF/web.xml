@@ -5,7 +5,7 @@
          http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
 
-    <display-name>Sistema de Estacionamiento Inteligente</display-name>
+    <display-name>Sistema de Estacionamiento</display-name>
 
     <listener>
         <listener-class>com.utp.estacionamiento.util.AppContextListener</listener-class>

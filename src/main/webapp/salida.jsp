@@ -7,11 +7,10 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header class="barra-superior">
-    <h1>Registrar salida</h1>
-    <a href="index.jsp" class="boton-salir">Volver</a>
-</header>
+<% String paginaActual = "salida"; %>
+<%@ include file="/WEB-INF/menu.jspf" %>
 <main>
+    <h2 class="titulo-pagina">Registrar salida</h2>
     <form id="formSalida">
         <label>Numero de ticket</label>
         <input type="number" name="idTicket" id="idTicket" required>

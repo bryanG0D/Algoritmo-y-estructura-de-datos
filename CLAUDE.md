@@ -112,9 +112,14 @@ docs/         entregables/diagrama-clases.drawio (UML, 5 paginas; copia en Lucid
 - **FiltroSesion** (`/*`): sin sesion, las JSP redirigen a `login.jsp` y los
   Servlets responden 401 en JSON; `main.js` vuelve al login ante un 401.
   `init()`/`destroy()` vacios son obligatorios: Jetty 9.4 usa Servlet 3.1.
-- **Panel de inicio** (`index.jsp` + `/resumen`): ocupacion desde la Matriz,
-  datos del AVL (placas, altura) y cobrado hoy. `busqueda.jsp` muestra el
-  recorrido de la busqueda en el AVL (`ArbolAVL.buscarConRecorrido`).
+- **Interfaz para usuario final (no tecnica):** la app se llama
+  "Estacionamiento" (el docente pidio no usar "Inteligente"). Menu comun en
+  `WEB-INF/menu.jspf` (cada JSP define `paginaActual` y lo incluye). El inicio
+  (`index.jsp` + `/resumen`) muestra ocupacion (Matriz) y una busqueda rapida
+  por placa con ficha del vehiculo y boton "Registrar salida" (abre
+  `salida.jsp?ticket=N`). No existe `busqueda.jsp`. El recorrido del AVL
+  (`ArbolAVL.buscarConRecorrido`) va en un "Detalle tecnico" plegado que se
+  QUITA en el `.rar` final. No mostrar terminos como AVL/Matriz al usuario.
 - **UML:** `docs/entregables/diagrama-clases.drawio` se genera leyendo el
   codigo con `node docs/herramientas/generar-diagrama-clases.js .`. Si cambia
   el codigo, regenerarlo en vez de editarlo a mano.

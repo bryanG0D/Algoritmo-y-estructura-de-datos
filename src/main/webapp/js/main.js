@@ -68,3 +68,17 @@ function fichaVehiculo(r) {
     }
     return html + '</div>';
 }
+
+// Detalle tecnico plegado: como se encontro la placa en el Arbol AVL (para la exposicion).
+function detalleTecnico(r) {
+    if (r.comparaciones === undefined) return '';
+    const ultimo = r.recorrido.length - 1;
+    const pasos = r.recorrido.map((p, i) =>
+        '<span class="nodo-avl' + (r.encontrado && i === ultimo ? ' encontrado' : '') + '">' + escaparHtml(p) + '</span>').join(' &rarr; ');
+    return '<details class="detalle-tecnico"><summary>Detalle tecnico de la busqueda</summary>' +
+        '<p>Busqueda en Arbol AVL: ' + r.comparaciones + ' comparaciones entre ' +
+        r.totalPlacas + ' placas (altura del arbol: ' + r.alturaArbol + ').</p>' +
+        '<p class="recorrido-avl">' + (pasos || 'Arbol vacio') + '</p>' +
+        '<p class="nota">Recorriendo una lista de inicio a fin podrian ser hasta ' +
+        r.totalPlacas + ' comparaciones.</p></details>';
+}

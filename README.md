@@ -1,4 +1,4 @@
-# Sistema de Estacionamiento Inteligente
+# Sistema de Estacionamiento
 
 Proyecto final del curso Algoritmos y Estructuras de Datos (UTP). Aplicacion
 web (Java Servlets + JSP + JavaScript) sobre MySQL, con patron DAO y tres
@@ -108,7 +108,7 @@ usaria un algoritmo como BCrypt.
 |---|---|
 | Registrar entrada | La **Matriz** elige el espacio: busca la fila con mas lugares libres del tipo adecuado (motos y bicicletas van a la columna 10; autos y camionetas a las columnas 1 a 9). Si no hay espacio, informa "estacionamiento lleno" y no crea ticket |
 | Registrar salida | Cobra segun la tarifa del tipo de vehiculo (Auto / Camioneta S/ 4, Moto S/ 2, Bicicleta S/ 1 por hora) y libera el espacio |
-| Buscar por placa | Consulta el **Arbol AVL en memoria** (O(log n)), no la base de datos directamente |
+| Inicio | Resumen de ocupacion (Matriz), cobrado hoy y busqueda rapida por placa: consulta el **Arbol AVL en memoria** (O(log n)) y muestra donde esta el vehiculo, con boton para registrar su salida (cliente que perdio el ticket) |
 | Mapa del estacionamiento | Dibuja la **Matriz 2D** (5x10) con el estado real de cada espacio |
 | Vehiculos | CRUD completo (Crear, Leer, Actualizar, Eliminar) usando el patron DAO |
 | Reporte de ingresos | Llama al procedimiento almacenado parametrizado por rango de fechas |

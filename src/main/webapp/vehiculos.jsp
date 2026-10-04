@@ -7,11 +7,10 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header class="barra-superior">
-    <h1>Gestion de vehiculos</h1>
-    <a href="index.jsp" class="boton-salir">Volver</a>
-</header>
+<% String paginaActual = "vehiculos"; %>
+<%@ include file="/WEB-INF/menu.jspf" %>
 <main>
+    <h2 class="titulo-pagina">Gestion de vehiculos</h2>
     <form id="formVehiculo">
         <input type="hidden" name="idVehiculo" id="idVehiculo">
         <label>Placa</label>
