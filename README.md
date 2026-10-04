@@ -122,14 +122,14 @@ database/         - estacionamiento_inteligente.sql (base completa desde cero)
 src/main/resources/db.properties.example - Plantilla de credenciales
 src/main/java/com/utp/estacionamiento/
   modelo/         - Clases POJO (Vehiculo, Ticket, Pago, etc.)
-  estructuras/    - ArbolAVL, MatrizEstacionamiento
+  estructuras/    - ArbolAVL, NodoAVL, ResultadoBusquedaAVL, MatrizEstacionamiento
   conexion/       - ConexionBD (punto unico de conexion JDBC)
   dao/            - Interfaces + implementaciones (patron DAO)
                     TicketDAOImpl invoca los procedimientos almacenados
   servicio/       - EstacionamientoService (integra AVL + Matriz + DAO)
                     CompatibilidadEspacio (regla moto/auto)
   servlet/        - Los Servlets (controladores web)
-  util/           - AppContextListener (carga todo al arrancar), GsonProvider
+  util/           - AppContextListener (carga todo al arrancar), FiltroSesion (exige login), GsonProvider
 src/main/webapp/  - Paginas JSP, CSS y JavaScript
 ```
 

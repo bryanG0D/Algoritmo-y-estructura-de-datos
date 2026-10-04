@@ -98,15 +98,34 @@ Ya esta hecho y probado contra una base real. NO lo vuelvas a implementar:
 
 ```
 modelo/       POJOs de las 6 entidades
-estructuras/  ArbolAVL, NodoAVL, MatrizEstacionamiento (sin cola de espera)
+estructuras/  ArbolAVL, NodoAVL, ResultadoBusquedaAVL, MatrizEstacionamiento (sin cola de espera)
 conexion/     ConexionBD (lee db.properties)
 dao/          Interfaz + Impl por entidad; TicketDAOImpl y PagoDAOImpl llaman a los procedimientos
 servicio/     EstacionamientoService (integra AVL + Matriz + DAO), CompatibilidadEspacio
-servlet/      Login, Logout, Entrada, Salida, Busqueda, Mapa, Vehiculo (CRUD), TipoVehiculo, Reporte
-util/         AppContextListener (inicializa el servicio), GsonProvider
-webapp/       JSP, css, js. Servlets registrados en WEB-INF/web.xml (sin anotaciones)
+servlet/      Login, Logout, Entrada, Salida, Busqueda, Mapa, Vehiculo (CRUD), TipoVehiculo, Reporte, Resumen
+util/         AppContextListener (inicializa el servicio), FiltroSesion, GsonProvider
+webapp/       JSP, css, js. Servlets y filtro registrados en WEB-INF/web.xml (sin anotaciones)
 database/     estacionamiento_inteligente.sql (unico script: crea todo)
+docs/         entregables/diagrama-clases.drawio (UML, 4 paginas) y herramientas/
 ```
+
+- **FiltroSesion** (`/*`): sin sesion, las JSP redirigen a `login.jsp` y los
+  Servlets responden 401 en JSON; `main.js` vuelve al login ante un 401.
+  `init()`/`destroy()` vacios son obligatorios: Jetty 9.4 usa Servlet 3.1.
+- **Panel de inicio** (`index.jsp` + `/resumen`): ocupacion desde la Matriz,
+  datos del AVL (placas, altura) y cobrado hoy. `busqueda.jsp` muestra el
+  recorrido de la busqueda en el AVL (`ArbolAVL.buscarConRecorrido`).
+- **UML:** `docs/entregables/diagrama-clases.drawio` se genera leyendo el
+  codigo con `node docs/herramientas/generar-diagrama-clases.js .`. Si cambia
+  el codigo, regenerarlo en vez de editarlo a mano.
+
+## Flujo de trabajo con git
+
+- `main` en GitHub es el respaldo estable: no se fusiona nada hasta que el
+  usuario lo pida. Se trabaja en `development`; commits locales y push solo
+  cuando el usuario lo indique.
+- El `.rar` final para el docente NO lleva `CLAUDE.md` (ni `docs/herramientas/`,
+  `db.properties`, `target/` o respaldos).
 
 ## Trampas conocidas
 
@@ -124,9 +143,8 @@ database/     estacionamiento_inteligente.sql (unico script: crea todo)
 
 1. Probar en NetBeans: F6 deberia levantar Jetty via `nbactions.xml`; si pide
    servidor, usar Tomcat 9.
-2. Diagrama de clases UML (entregable 3) como `.drawio` en `docs/entregables/`, reflejando
-   la estructura ya sin cola. Herramientas permitidas por la consigna:
-   StarUML, Rational, Draw.io, Lucidchart.
+2. ~~Diagrama de clases UML~~ HECHO (`docs/entregables/diagrama-clases.drawio`).
+   Falta exportarlo a PNG/PDF desde draw.io para las diapositivas.
 3. Documentacion (entregable 1) en `docs/entregables/documentacion.md`: empresa,
    problematica, objetivos, alcance, requerimientos funcionales.
 4. Diapositivas y PDF de la exposicion (`ProyectoG##.pptx` / `.pdf`).
