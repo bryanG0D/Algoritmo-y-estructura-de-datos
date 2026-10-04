@@ -1,0 +1,11 @@
+# Plantilla de configuracion de la base de datos.
+#
+# Cada integrante del grupo:
+#   1. Copia este archivo en la misma carpeta con el nombre db.properties
+#   2. Pon su propio usuario y contrasena de MySQL
+#
+# db.properties esta en el .gitignore: NO se sube a GitHub.
+
+db.url=jdbc:mysql://localhost:3306/estacionamiento_inteligente?useSSL=false&serverTimezone=America/Lima&allowPublicKeyRetrieval=true
+db.usuario=root
+db.contrasena=

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Acciones personalizadas para Apache NetBeans.
+
+    Hace que "Run Project" (F6) levante el proyecto con el plugin de Jetty
+    incluido en el pom.xml, en lugar de pedir un servidor configurado.
+    La aplicacion queda en http://localhost:8080/
+
+    Si prefieres usar Tomcat (ver README, seccion 4B), simplemente borra
+    este archivo y NetBeans volvera a su comportamiento normal de
+    desplegar en el servidor que tengas registrado.
+-->
+<actions>
+    <action>
+        <actionName>run</actionName>
+        <goals>
+            <goal>jetty:run</goal>
+        </goals>
+    </action>
+    <action>
+        <actionName>debug</actionName>
+        <goals>
+            <goal>jetty:run</goal>
+        </goals>
+        <properties>
+            <jpda.listen>true</jpda.listen>
+            <maven.surefire.debug>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</maven.surefire.debug>
+        </properties>
+    </action>
+</actions>

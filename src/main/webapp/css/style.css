@@ -1,0 +1,76 @@
+* { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+body { margin: 0; background: #f4f6f8; color: #222; }
+
+.contenedor-login {
+    max-width: 360px;
+    margin: 80px auto;
+    padding: 32px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.contenedor-login h1 { font-size: 20px; text-align: center; margin-bottom: 24px; }
+
+form label { display: block; margin-top: 12px; font-size: 14px; font-weight: bold; }
+form input, form select, form button {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+form button {
+    margin-top: 20px;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+form button:hover { background: #1e4fc4; }
+
+.barra-superior {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #1e293b;
+    color: #fff;
+    padding: 16px 24px;
+}
+.barra-superior h1 { font-size: 18px; margin: 0; flex-grow: 1; }
+.boton-salir { color: #fff; text-decoration: none; background: #ef4444; padding: 6px 12px; border-radius: 4px; }
+
+.menu-principal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 24px;
+}
+.menu-principal a {
+    background: #fff;
+    padding: 16px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #1e293b;
+    font-weight: bold;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.menu-principal a:hover { background: #e2e8f0; }
+
+main { max-width: 700px; margin: 24px auto; padding: 0 16px; }
+
+.error { color: #dc2626; font-weight: bold; }
+.exito { color: #16a34a; font-weight: bold; }
+.aviso { color: #d97706; font-weight: bold; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 16px; background: #fff; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+th { background: #1e293b; color: #fff; }
+td button { width: auto; padding: 4px 10px; margin: 0 4px 0 0; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; }
+
+#matriz table { border-collapse: collapse; }
+#matriz td { width: 60px; height: 40px; border: 1px solid #999; text-align: center; font-size: 10px; }
+.celda.libre { background: #bbf7d0; }
+.celda.ocupado { background: #fecaca; }
+#leyenda { margin-bottom: 12px; }
+#leyenda .celda { display: inline-block; width: 16px; height: 16px; margin-right: 4px; vertical-align: middle; }
