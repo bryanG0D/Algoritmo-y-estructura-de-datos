@@ -106,7 +106,7 @@ servlet/      Login, Logout, Entrada, Salida, Busqueda, Mapa, Vehiculo (CRUD), T
 util/         AppContextListener (inicializa el servicio), FiltroSesion, GsonProvider
 webapp/       JSP, css, js. Servlets y filtro registrados en WEB-INF/web.xml (sin anotaciones)
 database/     estacionamiento_inteligente.sql (unico script: crea todo)
-docs/         entregables/diagrama-clases.drawio (UML, 4 paginas) y herramientas/
+docs/         entregables/diagrama-clases.drawio (UML, 5 paginas; copia en Lucidchart) y herramientas/
 ```
 
 - **FiltroSesion** (`/*`): sin sesion, las JSP redirigen a `login.jsp` y los
