@@ -29,8 +29,9 @@ document.getElementById('formBusqueda').addEventListener('submit', function (e) 
         .then(r => r.json())
         .then(r => {
             const div = document.getElementById('resultado');
+            const traza = recorridoAVL(r);
             if (!r.encontrado) {
-                div.innerHTML = '<p class="aviso">' + r.mensaje + '</p>';
+                div.innerHTML = '<p class="aviso">' + r.mensaje + '</p>' + traza;
                 return;
             }
             const v = r.vehiculo;
@@ -41,9 +42,23 @@ document.getElementById('formBusqueda').addEventListener('submit', function (e) 
             } else {
                 html += '<p class="aviso">Sin ticket activo actualmente.</p>';
             }
-            div.innerHTML = html;
+            div.innerHTML = html + traza;
         });
 });
+
+// Muestra como bajo la busqueda por el Arbol AVL: nodos visitados y comparaciones.
+function recorridoAVL(r) {
+    if (r.comparaciones === undefined) return '';
+    const ultimo = r.recorrido.length - 1;
+    const pasos = r.recorrido.map((p, i) =>
+        '<span class="nodo-avl' + (r.encontrado && i === ultimo ? ' encontrado' : '') + '">' + p + '</span>').join(' &rarr; ');
+    return '<div class="panel-avl">' +
+        '<p><strong>Arbol AVL:</strong> ' + r.comparaciones + ' comparaciones entre ' +
+        r.totalPlacas + ' placas (altura del arbol: ' + r.alturaArbol + ').</p>' +
+        '<p class="recorrido-avl">' + (pasos || 'Arbol vacio') + '</p>' +
+        '<p class="nota">Una lista recorrida de inicio a fin podria necesitar hasta ' +
+        r.totalPlacas + ' comparaciones.</p></div>';
+}
 </script>
 </body>
 </html>

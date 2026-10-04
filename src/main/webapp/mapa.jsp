@@ -15,6 +15,7 @@
     <div id="leyenda">
         <span class="celda libre"></span> Libre
         <span class="celda ocupado"></span> Ocupado
+        &nbsp; Columna 10 (borde azul): espacios para motos y bicicletas
     </div>
     <div id="matriz"></div>
 </main>
@@ -40,7 +41,8 @@ function cargarMapa() {
                     const espacio = espacios.find(e => e.fila === f && e.columna === c);
                     const celda = document.createElement('td');
                     if (espacio) {
-                        celda.className = 'celda ' + (espacio.estado === 'LIBRE' ? 'libre' : 'ocupado');
+                        celda.className = 'celda ' + (espacio.estado === 'LIBRE' ? 'libre' : 'ocupado') +
+                            (espacio.idTipoPermitido === 2 ? ' moto' : '');
                         celda.title = espacio.numeroEspacio;
                         celda.textContent = espacio.numeroEspacio;
                     }

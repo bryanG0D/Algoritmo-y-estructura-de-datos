@@ -2,6 +2,7 @@ package com.utp.estacionamiento.servlet;
 
 import com.google.gson.Gson;
 import com.utp.estacionamiento.util.GsonProvider;
+import com.utp.estacionamiento.estructuras.ResultadoBusquedaAVL;
 import com.utp.estacionamiento.modelo.Ticket;
 import com.utp.estacionamiento.modelo.Vehiculo;
 import com.utp.estacionamiento.servicio.EstacionamientoService;
@@ -31,7 +32,12 @@ public class BusquedaServlet extends HttpServlet {
                     getServletContext().getAttribute(AppContextListener.ATRIBUTO_SERVICIO);
 
             // Busqueda O(log n) en el Arbol AVL en memoria
-            Vehiculo vehiculo = servicio.buscarVehiculoEnMemoria(placa);
+            ResultadoBusquedaAVL busqueda = servicio.buscarConRecorrido(placa);
+            Vehiculo vehiculo = busqueda.getVehiculo();
+            respuesta.put("comparaciones", busqueda.getComparaciones());
+            respuesta.put("recorrido", busqueda.getRecorrido());
+            respuesta.put("alturaArbol", servicio.getAlturaArbol());
+            respuesta.put("totalPlacas", servicio.getTamanoArbol());
 
             if (vehiculo == null) {
                 respuesta.put("encontrado", false);

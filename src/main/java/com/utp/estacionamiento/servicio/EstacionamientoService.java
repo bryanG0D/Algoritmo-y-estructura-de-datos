@@ -14,6 +14,7 @@ import com.utp.estacionamiento.dao.VehiculoDAO;
 import com.utp.estacionamiento.dao.VehiculoDAOImpl;
 import com.utp.estacionamiento.estructuras.ArbolAVL;
 import com.utp.estacionamiento.estructuras.MatrizEstacionamiento;
+import com.utp.estacionamiento.estructuras.ResultadoBusquedaAVL;
 import com.utp.estacionamiento.modelo.EspacioEstacionamiento;
 import com.utp.estacionamiento.modelo.Ticket;
 import com.utp.estacionamiento.modelo.TipoVehiculo;
@@ -139,6 +140,14 @@ public class EstacionamientoService {
     public Vehiculo buscarVehiculoEnMemoria(String placa) {
         return arbolPlacas.buscarPorPlaca(placa);
     }
+
+    /** Busqueda en el AVL que ademas informa comparaciones y nodos visitados. */
+    public ResultadoBusquedaAVL buscarConRecorrido(String placa) {
+        return arbolPlacas.buscarConRecorrido(placa);
+    }
+
+    public int getTamanoArbol() { return arbolPlacas.tamano(); }
+    public int getAlturaArbol() { return arbolPlacas.altura(); }
 
     public Ticket buscarTicketActivoDeVehiculo(int idVehiculo) throws SQLException {
         for (Ticket t : ticketDAO.listarActivos()) {

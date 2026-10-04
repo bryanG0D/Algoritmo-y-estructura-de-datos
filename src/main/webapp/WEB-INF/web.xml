@@ -102,6 +102,15 @@
         <url-pattern>/reporte</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>ResumenServlet</servlet-name>
+        <servlet-class>com.utp.estacionamiento.servlet.ResumenServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ResumenServlet</servlet-name>
+        <url-pattern>/resumen</url-pattern>
+    </servlet-mapping>
+
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>
     </welcome-file-list>
