@@ -12,6 +12,10 @@ body { margin: 0; background: #f4f6f8; color: #222; }
 .contenedor-login h1 { font-size: 20px; text-align: center; margin-bottom: 24px; }
 
 form label { display: block; margin-top: 12px; font-size: 14px; font-weight: bold; }
+form label .opcional { font-weight: normal; color: #6b7280; }
+form .nota { margin: 4px 0 0; }
+#placa { text-transform: uppercase; }
+form button:disabled { background: #9ca3af; cursor: not-allowed; }
 form input, form select, form button {
     width: 100%;
     padding: 8px;

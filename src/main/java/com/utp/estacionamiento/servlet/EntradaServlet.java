@@ -27,10 +27,10 @@ public class EntradaServlet extends HttpServlet {
             EstacionamientoService servicio = (EstacionamientoService)
                     getServletContext().getAttribute(AppContextListener.ATRIBUTO_SERVICIO);
 
-            String placa = req.getParameter("placa").toUpperCase();
-            String marca = req.getParameter("marca");
-            String modelo = req.getParameter("modelo");
-            String color = req.getParameter("color");
+            String placa = req.getParameter("placa").trim().toUpperCase();
+            String marca = opcional(req.getParameter("marca"));
+            String modelo = opcional(req.getParameter("modelo"));
+            String color = opcional(req.getParameter("color"));
             int idTipo = Integer.parseInt(req.getParameter("idTipo"));
             int idUsuario = obtenerIdUsuarioSesion(req);
 
@@ -57,5 +57,10 @@ public class EntradaServlet extends HttpServlet {
             return ((Usuario) sesion.getAttribute("usuario")).getIdUsuario();
         }
         return 1; // usuario por defecto si no hay sesion activa
+    }
+
+    /** Marca, modelo y color son opcionales: si llegan vacios se guardan como NULL. */
+    private static String opcional(String valor) {
+        return (valor == null || valor.trim().isEmpty()) ? null : valor.trim();
     }
 }

@@ -42,10 +42,10 @@ public class VehiculoServlet extends HttpServlet {
             switch (accion) {
                 case "crear": {
                     Vehiculo v = new Vehiculo();
-                    v.setPlaca(req.getParameter("placa").toUpperCase());
-                    v.setMarca(req.getParameter("marca"));
-                    v.setModelo(req.getParameter("modelo"));
-                    v.setColor(req.getParameter("color"));
+                    v.setPlaca(req.getParameter("placa").trim().toUpperCase());
+                    v.setMarca(opcional(req.getParameter("marca")));
+                    v.setModelo(opcional(req.getParameter("modelo")));
+                    v.setColor(opcional(req.getParameter("color")));
                     v.setIdTipo(Integer.parseInt(req.getParameter("idTipo")));
                     vehiculoDAO.insertar(v);
                     respuesta.put("exito", true);
@@ -54,10 +54,10 @@ public class VehiculoServlet extends HttpServlet {
                 case "actualizar": {
                     Vehiculo v = new Vehiculo();
                     v.setIdVehiculo(Integer.parseInt(req.getParameter("idVehiculo")));
-                    v.setPlaca(req.getParameter("placa").toUpperCase());
-                    v.setMarca(req.getParameter("marca"));
-                    v.setModelo(req.getParameter("modelo"));
-                    v.setColor(req.getParameter("color"));
+                    v.setPlaca(req.getParameter("placa").trim().toUpperCase());
+                    v.setMarca(opcional(req.getParameter("marca")));
+                    v.setModelo(opcional(req.getParameter("modelo")));
+                    v.setColor(opcional(req.getParameter("color")));
                     v.setIdTipo(Integer.parseInt(req.getParameter("idTipo")));
                     vehiculoDAO.actualizar(v);
                     respuesta.put("exito", true);
@@ -80,5 +80,10 @@ public class VehiculoServlet extends HttpServlet {
 
         resp.setContentType("application/json;charset=UTF-8");
         resp.getWriter().write(gson.toJson(respuesta));
+    }
+
+    /** Marca, modelo y color son opcionales: si llegan vacios se guardan como NULL. */
+    private static String opcional(String valor) {
+        return (valor == null || valor.trim().isEmpty()) ? null : valor.trim();
     }
 }

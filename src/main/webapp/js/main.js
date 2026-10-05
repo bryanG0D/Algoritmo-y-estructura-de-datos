@@ -48,6 +48,16 @@ function describirEntrada(fechaIso) {
     return { cuando, hace };
 }
 
+// "Toyota Yaris rojo"; omite los datos opcionales que no se registraron.
+function descripcionVehiculo(v) {
+    return [v.marca, v.modelo, v.color].filter(Boolean).join(' ');
+}
+
+// Escribe la placa siempre en mayusculas y sin espacios (evita duplicados como abc-123 / ABC-123).
+function normalizarPlaca(input) {
+    input.addEventListener('input', () => { input.value = input.value.toUpperCase().replace(/\s/g, ''); });
+}
+
 // Ficha del vehiculo para la respuesta de /buscar (usada en inicio y en busqueda).
 function fichaVehiculo(r) {
     if (r.error) return '<p class="error">' + escaparHtml(r.error) + '</p>';
@@ -55,8 +65,7 @@ function fichaVehiculo(r) {
     const v = r.vehiculo;
     let html = '<div class="ficha">' +
         '<div class="ficha-placa">' + escaparHtml(v.placa) + '</div>' +
-        '<div>' + escaparHtml(v.marca) + ' ' + escaparHtml(v.modelo) + ' &middot; ' + escaparHtml(v.color) +
-        (r.nombreTipo ? ' &middot; ' + escaparHtml(r.nombreTipo) : '') + '</div>';
+        '<div>' + [descripcionVehiculo(v), r.nombreTipo].filter(Boolean).map(escaparHtml).join(' &middot; ') + '</div>';
     if (r.ticketActivo) {
         const e = describirEntrada(r.ticketActivo.fechaHoraEntrada);
         html += '<p class="exito">Estacionado en el espacio ' + escaparHtml(r.numeroEspacio || '') +

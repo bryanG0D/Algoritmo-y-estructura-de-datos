@@ -14,15 +14,15 @@
     <form id="formVehiculo">
         <input type="hidden" name="idVehiculo" id="idVehiculo">
         <label>Placa</label>
-        <input type="text" name="placa" id="placa" required>
-        <label>Marca</label>
-        <input type="text" name="marca" id="marca" required>
-        <label>Modelo</label>
-        <input type="text" name="modelo" id="modelo" required>
-        <label>Color</label>
-        <input type="text" name="color" id="color" required>
+        <input type="text" name="placa" id="placa" maxlength="10" placeholder="Ej. ABC-123" autocomplete="off" required>
         <label>Tipo</label>
         <select name="idTipo" id="idTipo" required></select>
+        <label>Marca <span class="opcional">(opcional)</span></label>
+        <input type="text" name="marca" id="marca" maxlength="30">
+        <label>Modelo <span class="opcional">(opcional)</span></label>
+        <input type="text" name="modelo" id="modelo" maxlength="30">
+        <label>Color <span class="opcional">(opcional)</span></label>
+        <input type="text" name="color" id="color" maxlength="20">
         <button type="submit" id="botonGuardar">Agregar</button>
     </form>
 
@@ -36,6 +36,7 @@
 <script src="js/main.js"></script>
 <script>
 cargarTiposVehiculo('idTipo');
+normalizarPlaca(document.getElementById('placa'));
 
 function cargarVehiculos() {
     fetch('vehiculos')
@@ -45,8 +46,8 @@ function cargarVehiculos() {
             tbody.innerHTML = '';
             (r.vehiculos || []).forEach(v => {
                 const fila = document.createElement('tr');
-                fila.innerHTML = '<td>' + v.placa + '</td><td>' + v.marca + '</td><td>' +
-                    v.modelo + '</td><td>' + v.color + '</td><td>' + v.nombreTipo + '</td><td></td>';
+                fila.innerHTML = [v.placa, v.marca, v.modelo, v.color, v.nombreTipo]
+                    .map(dato => '<td>' + (dato ? escaparHtml(dato) : '-') + '</td>').join('') + '<td></td>';
                 const celdaAcciones = fila.lastElementChild;
 
                 const btnEditar = document.createElement('button');
@@ -69,9 +70,9 @@ function cargarVehiculos() {
 function cargarEnFormulario(v) {
     document.getElementById('idVehiculo').value = v.idVehiculo;
     document.getElementById('placa').value = v.placa;
-    document.getElementById('marca').value = v.marca;
-    document.getElementById('modelo').value = v.modelo;
-    document.getElementById('color').value = v.color;
+    document.getElementById('marca').value = v.marca || '';
+    document.getElementById('modelo').value = v.modelo || '';
+    document.getElementById('color').value = v.color || '';
     document.getElementById('idTipo').value = v.idTipo;
     document.getElementById('botonGuardar').textContent = 'Actualizar';
 }
