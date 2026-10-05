@@ -38,6 +38,18 @@
             <version>8.4.0</version>
         </dependency>
 
+        <!-- Pool de conexiones: reutiliza conexiones abiertas en vez de abrir una por consulta -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.13</version>
+        </dependency>
+
         <!-- Serializacion JSON para las respuestas de los Servlets -->
         <dependency>
             <groupId>com.google.code.gson</groupId>

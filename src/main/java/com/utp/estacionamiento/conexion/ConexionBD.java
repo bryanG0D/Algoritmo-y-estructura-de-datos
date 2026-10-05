@@ -1,9 +1,11 @@
 package com.utp.estacionamiento.conexion;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -19,6 +21,11 @@ import java.util.Properties;
  * Si el archivo no existe, se usan valores por defecto (root sin
  * contrasena en localhost), que funcionan en una instalacion basica de
  * MySQL o XAMPP.
+ *
+ * Usa un pool de conexiones (HikariCP): abrir una conexion cifrada a la base
+ * en la nube tarda cerca de un segundo, asi que se mantienen algunas abiertas
+ * y se reutilizan. Para los DAO no cambia nada: piden una conexion y al
+ * cerrarla (try-with-resources) vuelve al pool en lugar de cerrarse.
  */
 public class ConexionBD {
 
@@ -29,9 +36,7 @@ public class ConexionBD {
     private static final String USUARIO_POR_DEFECTO = "root";
     private static final String CONTRASENA_POR_DEFECTO = "";
 
-    private static final String URL;
-    private static final String USUARIO;
-    private static final String CONTRASENA;
+    private static final HikariDataSource POOL;
 
     static {
         Properties props = new Properties();
@@ -48,21 +53,25 @@ public class ConexionBD {
             System.out.println("ConexionBD: error leyendo " + ARCHIVO + ", usando valores por defecto. " + e.getMessage());
         }
 
-        URL = props.getProperty("db.url", URL_POR_DEFECTO);
-        USUARIO = props.getProperty("db.usuario", USUARIO_POR_DEFECTO);
-        CONTRASENA = props.getProperty("db.contrasena", CONTRASENA_POR_DEFECTO);
-
-        String driver = props.getProperty("db.driver", "com.mysql.cj.jdbc.Driver");
-        try {
-            Class.forName(driver);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("No se encontro el driver " + driver + " en el classpath", e);
-        }
+        HikariConfig config = new HikariConfig();
+        config.setDriverClassName(props.getProperty("db.driver", "com.mysql.cj.jdbc.Driver"));
+        config.setJdbcUrl(props.getProperty("db.url", URL_POR_DEFECTO));
+        config.setUsername(props.getProperty("db.usuario", USUARIO_POR_DEFECTO));
+        config.setPassword(props.getProperty("db.contrasena", CONTRASENA_POR_DEFECTO));
+        config.setMaximumPoolSize(5);
+        config.setMinimumIdle(1);
+        config.setPoolName("Estacionamiento");
+        POOL = new HikariDataSource(config);
     }
 
     private ConexionBD() {}
 
     public static Connection obtenerConexion() throws SQLException {
-        return DriverManager.getConnection(URL, USUARIO, CONTRASENA);
+        return POOL.getConnection();
+    }
+
+    /** Cierra las conexiones del pool al detener la aplicacion. */
+    public static void cerrar() {
+        POOL.close();
     }
 }
