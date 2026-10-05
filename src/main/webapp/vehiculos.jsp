@@ -25,7 +25,7 @@
 
     <table id="tablaVehiculos">
         <thead>
-        <tr><th>Placa</th><th>Marca</th><th>Tipo</th><th>Acciones</th></tr>
+        <tr><th>Placa</th><th>Marca</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr>
         </thead>
         <tbody></tbody>
     </table>
@@ -41,10 +41,12 @@ function cargarVehiculos() {
         .then(r => {
             const tbody = document.querySelector('#tablaVehiculos tbody');
             tbody.innerHTML = '';
+            const activos = r.activos || {};
             (r.vehiculos || []).forEach(v => {
                 const fila = document.createElement('tr');
                 fila.innerHTML = [v.placa, v.marca, v.nombreTipo]
-                    .map(dato => '<td>' + (dato ? escaparHtml(dato) : '-') + '</td>').join('') + '<td></td>';
+                    .map(dato => '<td>' + (dato ? escaparHtml(dato) : '-') + '</td>').join('') +
+                    '<td>' + estadoVehiculo(activos[v.idVehiculo]) + '</td><td></td>';
                 const celdaAcciones = fila.lastElementChild;
 
                 const btnEditar = document.createElement('button');
@@ -62,6 +64,13 @@ function cargarVehiculos() {
                 tbody.appendChild(fila);
             });
         });
+}
+
+// Dentro: muestra su ticket activo (enlace a la salida) para validarlo con el que tiene el cliente.
+function estadoVehiculo(activo) {
+    if (!activo) return '<span class="estado-fuera">Fuera</span>';
+    return '<a class="estado-dentro" href="salida.jsp?ticket=' + activo.idTicket + '">Dentro &middot; Ticket N.&deg; ' +
+        activo.idTicket + ' &middot; ' + escaparHtml(activo.numeroEspacio) + '</a>';
 }
 
 function cargarEnFormulario(v) {

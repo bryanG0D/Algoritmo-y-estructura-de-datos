@@ -126,7 +126,11 @@ docs/         entregables/diagrama-clases.drawio (UML, 5 paginas; copia en Lucid
   `WEB-INF/menu.jspf` (cada JSP define `paginaActual` y lo incluye). El inicio
   (`index.jsp` + `/resumen`) muestra ocupacion (Matriz) y una busqueda rapida
   por placa con ficha del vehiculo y boton "Registrar salida" (abre
-  `salida.jsp?ticket=N`). No existe `busqueda.jsp`. El recorrido del AVL
+  `salida.jsp?ticket=N`). No existe `busqueda.jsp`. Entrada muestra un ticket imprimible
+  (`htmlTicket` en main.js, `@media print`); Salida acepta N.° de ticket o placa
+  (`GET /salida?consulta=`, `EstacionamientoService.consultarTicketActivo`) y
+  muestra el monto antes de cobrar (misma regla que `sp_registrar_salida`).
+  Vehiculos muestra columna Estado con el ticket activo. El recorrido del AVL
   (`ArbolAVL.buscarConRecorrido`) va en un "Detalle tecnico" plegado que se
   QUITA en el `.rar` final. No mostrar terminos como AVL/Matriz al usuario.
 - **UML:** `docs/entregables/diagrama-clases.drawio` se genera leyendo el

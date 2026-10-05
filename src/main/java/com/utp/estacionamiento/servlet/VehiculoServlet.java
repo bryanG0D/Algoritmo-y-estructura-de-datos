@@ -2,6 +2,8 @@ package com.utp.estacionamiento.servlet;
 
 import com.google.gson.Gson;
 import com.utp.estacionamiento.util.GsonProvider;
+import com.utp.estacionamiento.modelo.EspacioEstacionamiento;
+import com.utp.estacionamiento.modelo.Ticket;
 import com.utp.estacionamiento.modelo.Vehiculo;
 import com.utp.estacionamiento.servicio.EstacionamientoService;
 import com.utp.estacionamiento.util.AppContextListener;
@@ -36,6 +38,16 @@ public class VehiculoServlet extends HttpServlet {
         Map<String, Object> respuesta = new HashMap<>();
         try {
             respuesta.put("vehiculos", servicio().getVehiculoDAO().listarTodos());
+            // Vehiculos que estan dentro: idVehiculo -> numero de ticket y espacio
+            Map<Integer, Map<String, Object>> activos = new HashMap<>();
+            for (Ticket t : servicio().listarTicketsActivos()) {
+                Map<String, Object> dato = new HashMap<>();
+                dato.put("idTicket", t.getIdTicket());
+                EspacioEstacionamiento e = servicio().getMatriz().buscarPorId(t.getIdEspacio());
+                dato.put("numeroEspacio", e != null ? e.getNumeroEspacio() : null);
+                activos.put(t.getIdVehiculo(), dato);
+            }
+            respuesta.put("activos", activos);
         } catch (SQLException e) {
             respuesta.put("error", e.getMessage());
         }

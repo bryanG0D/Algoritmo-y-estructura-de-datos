@@ -11,9 +11,15 @@
 <%@ include file="/WEB-INF/menu.jspf" %>
 <main>
     <h2 class="titulo-pagina">Registrar salida</h2>
-    <form id="formSalida">
-        <label>Numero de ticket</label>
-        <input type="number" name="idTicket" id="idTicket" required>
+    <form id="formConsulta">
+        <label>Numero de ticket o placa</label>
+        <input type="text" id="consulta" placeholder="Ej. 31 o ABC-123" autocomplete="off" required>
+        <p class="nota">Si el cliente perdio su ticket, escriba la placa.</p>
+        <button type="submit">Buscar</button>
+    </form>
+
+    <form id="formCobro" hidden>
+        <div id="resumen"></div>
         <label>Metodo de pago</label>
         <select name="metodoPago" id="metodoPago" required>
             <option value="EFECTIVO">Efectivo</option>
@@ -21,36 +27,72 @@
             <option value="YAPE">Yape</option>
             <option value="PLIN">Plin</option>
         </select>
-        <button type="submit">Cobrar y liberar espacio</button>
+        <input type="hidden" name="idTicket" id="idTicket">
+        <button type="submit" id="botonCobrar">Cobrar y liberar espacio</button>
     </form>
     <div id="resultado"></div>
 </main>
 <script src="js/main.js"></script>
 <script>
-// Si se llega desde la busqueda por placa (cliente sin ticket), el numero ya viene en la URL.
-const ticketUrl = new URLSearchParams(location.search).get('ticket');
-if (ticketUrl) document.getElementById('idTicket').value = ticketUrl;
+const campoConsulta = document.getElementById('consulta');
+const formCobro = document.getElementById('formCobro');
+const resultado = document.getElementById('resultado');
 
-document.getElementById('formSalida').addEventListener('submit', function (e) {
-    e.preventDefault();
-    const datos = new URLSearchParams(new FormData(e.target));
-
-    fetch('salida', { method: 'POST', body: datos })
+// Paso 1: buscar el ticket activo (por numero o por placa) y mostrar cuanto se debe, sin cobrar.
+function consultar() {
+    const consulta = campoConsulta.value.trim();
+    resultado.innerHTML = '';
+    formCobro.hidden = true;
+    fetch('salida?consulta=' + encodeURIComponent(consulta))
         .then(r => r.json())
         .then(r => {
-            const div = document.getElementById('resultado');
-            if (r.error) {
-                div.innerHTML = '<p class="error">' + r.error + '</p>';
-                return;
-            }
-            let html = '<p class="exito">Monto cobrado: S/ ' + r.monto + '</p>';
-            if (r.numeroEspacioLiberado) {
-                html += '<p>Espacio ' + r.numeroEspacioLiberado + ' liberado.</p>';
-            }
-            div.innerHTML = html;
-            e.target.reset();
+            if (r.error) { resultado.innerHTML = '<p class="error">' + escaparHtml(r.error) + '</p>'; return; }
+            if (!r.encontrado) { resultado.innerHTML = '<p class="aviso">' + escaparHtml(r.mensaje) + '</p>'; return; }
+            const t = r.ticket;
+            const e = describirEntrada(t.fechaHoraEntrada);
+            document.getElementById('resumen').innerHTML =
+                '<div class="ficha">' +
+                '<div class="ficha-placa">' + escaparHtml(t.placa) + '</div>' +
+                '<div>' + [t.nombreTipo, t.marca].filter(Boolean).map(escaparHtml).join(' &middot; ') + '</div>' +
+                '<table class="ticket-datos">' +
+                '<tr><td>Ticket</td><td>N.&deg; ' + t.idTicket + '</td></tr>' +
+                '<tr><td>Espacio</td><td>' + escaparHtml(t.numeroEspacio) + '</td></tr>' +
+                '<tr><td>Entrada</td><td>' + fechaHoraCorta(t.fechaHoraEntrada) + ' (hace ' + e.hace + ')</td></tr>' +
+                '<tr><td>Tiempo cobrado</td><td>' + t.horas + (t.horas === 1 ? ' hora' : ' horas') + ' x ' + soles(t.precioHora) + '</td></tr>' +
+                '</table>' +
+                '<div class="total">Total a pagar: ' + soles(t.monto) + '</div>' +
+                '</div>';
+            document.getElementById('idTicket').value = t.idTicket;
+            document.getElementById('botonCobrar').textContent = 'Cobrar ' + soles(t.monto) + ' y liberar espacio';
+            formCobro.hidden = false;
+        });
+}
+
+document.getElementById('formConsulta').addEventListener('submit', function (e) {
+    e.preventDefault();
+    consultar();
+});
+
+// Paso 2: cobrar (el monto final lo calcula el procedimiento almacenado al registrar la salida).
+formCobro.addEventListener('submit', function (e) {
+    e.preventDefault();
+    fetch('salida', { method: 'POST', body: new URLSearchParams(new FormData(formCobro)) })
+        .then(r => r.json())
+        .then(r => {
+            if (r.error) { resultado.innerHTML = '<p class="error">' + escaparHtml(r.error) + '</p>'; return; }
+            formCobro.hidden = true;
+            campoConsulta.value = '';
+            resultado.innerHTML = '<p class="exito">Cobrado ' + soles(r.monto) + '. Espacio ' +
+                escaparHtml(r.numeroEspacioLiberado || '') + ' liberado.</p>';
         });
 });
+
+// Si se llega desde la busqueda por placa del inicio, el ticket viene en la URL y se consulta solo.
+const ticketUrl = new URLSearchParams(location.search).get('ticket');
+if (ticketUrl) {
+    campoConsulta.value = ticketUrl;
+    consultar();
+}
 </script>
 </body>
 </html>

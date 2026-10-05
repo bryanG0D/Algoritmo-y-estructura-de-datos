@@ -48,6 +48,33 @@ function describirEntrada(fechaIso) {
     return { cuando, hace };
 }
 
+// "2026-10-04T19:49:19" -> "04/10/2026 19:49"
+function fechaHoraCorta(fechaIso) {
+    const f = new Date(fechaIso);
+    return f.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
+        f.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+}
+
+function soles(monto) {
+    return 'S/ ' + Number(monto).toFixed(2);
+}
+
+// Ticket que se entrega al conductor (se imprime solo este bloque, ver @media print en style.css).
+function htmlTicket(t) {
+    return '<div class="ticket" id="ticketImprimible">' +
+        '<div class="ticket-titulo">ESTACIONAMIENTO</div>' +
+        '<div class="ticket-numero">Ticket N.&deg; ' + t.idTicket + '</div>' +
+        '<div class="ficha-placa">' + escaparHtml(t.placa) + '</div>' +
+        '<table class="ticket-datos">' +
+        '<tr><td>Vehiculo</td><td>' + [t.nombreTipo, t.marca].filter(Boolean).map(escaparHtml).join(' &middot; ') + '</td></tr>' +
+        '<tr><td>Espacio</td><td><b>' + escaparHtml(t.numeroEspacio) + '</b> (fila ' + t.fila + ')</td></tr>' +
+        '<tr><td>Entrada</td><td>' + fechaHoraCorta(t.fechaHoraEntrada) + '</td></tr>' +
+        '<tr><td>Tarifa</td><td>' + soles(t.precioHora) + ' por hora o fraccion</td></tr>' +
+        '</table>' +
+        '<div class="ticket-pie">Conserve este ticket para retirar su vehiculo.</div>' +
+        '</div>';
+}
+
 // Escribe la placa siempre en mayusculas y sin espacios (evita duplicados como abc-123 / ABC-123).
 function normalizarPlaca(input) {
     input.addEventListener('input', () => { input.value = input.value.toUpperCase().replace(/\s/g, ''); });

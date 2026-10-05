@@ -22,6 +22,8 @@ import com.utp.estacionamiento.modelo.Vehiculo;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -180,6 +182,76 @@ public class EstacionamientoService {
             }
         }
         return null;
+    }
+
+    public List<Ticket> listarTicketsActivos() throws SQLException {
+        return ticketDAO.listarActivos();
+    }
+
+    /** Lo que se imprime en el ticket y se muestra antes de cobrar. */
+    public static class DetalleTicket {
+        public int idTicket;
+        public String placa;
+        public String marca;
+        public String nombreTipo;
+        public String numeroEspacio;
+        public int fila;
+        public LocalDateTime fechaHoraEntrada;
+        public BigDecimal precioHora;
+        public long horas;
+        public BigDecimal monto;
+    }
+
+    public DetalleTicket detalleTicket(int idTicket) throws SQLException {
+        Ticket t = ticketDAO.buscarPorId(idTicket);
+        return t == null ? null : detalleDe(t);
+    }
+
+    /**
+     * Busca el ticket ACTIVO por su numero o por la placa del vehiculo
+     * (cliente que perdio el ticket: la placa se busca en el Arbol AVL).
+     */
+    public DetalleTicket consultarTicketActivo(String consulta) throws SQLException {
+        String texto = consulta.trim().toUpperCase();
+        Ticket ticket;
+        if (texto.matches("\\d+")) {
+            ticket = ticketDAO.buscarPorId(Integer.parseInt(texto));
+        } else {
+            Vehiculo v = arbolPlacas.buscarPorPlaca(texto);
+            ticket = v == null ? null : buscarTicketActivoDeVehiculo(v.getIdVehiculo());
+        }
+        if (ticket == null || !"ACTIVO".equals(ticket.getEstadoTicket())) {
+            return null;
+        }
+        return detalleDe(ticket);
+    }
+
+    /** Monto a la fecha con la misma regla que sp_registrar_salida: horas redondeadas hacia arriba, minimo 1. */
+    private DetalleTicket detalleDe(Ticket t) throws SQLException {
+        DetalleTicket d = new DetalleTicket();
+        d.idTicket = t.getIdTicket();
+        d.fechaHoraEntrada = t.getFechaHoraEntrada();
+
+        Vehiculo v = vehiculoDAO.buscarPorId(t.getIdVehiculo());
+        d.placa = v.getPlaca();
+        d.marca = v.getMarca();
+        for (TipoVehiculo tipo : tipoVehiculoDAO.listarTodos()) {
+            if (tipo.getIdTipo() == v.getIdTipo()) {
+                d.nombreTipo = tipo.getNombre();
+                d.precioHora = tipo.getPrecioHora();
+            }
+        }
+
+        EspacioEstacionamiento espacio = matriz.buscarPorId(t.getIdEspacio());
+        if (espacio != null) {
+            d.numeroEspacio = espacio.getNumeroEspacio();
+            d.fila = espacio.getFila();
+        }
+
+        long minutos = Duration.between(t.getFechaHoraEntrada(), LocalDateTime.now()).toMinutes();
+        d.horas = Math.max(1, (minutos + 59) / 60);
+        d.monto = d.precioHora.multiply(BigDecimal.valueOf(d.horas));
+        return d;
     }
 
     public MatrizEstacionamiento getMatriz() { return matriz; }

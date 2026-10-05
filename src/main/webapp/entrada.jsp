@@ -73,8 +73,8 @@ document.getElementById('formEntrada').addEventListener('submit', function (e) {
             if (r.error) {
                 div.innerHTML = '<p class="error">' + escaparHtml(r.error) + '</p>';
             } else if (r.asignado) {
-                div.innerHTML = '<p class="exito">Ticket #' + r.idTicket +
-                    ' creado. Espacio asignado: ' + escaparHtml(r.numeroEspacio) + '</p>';
+                div.innerHTML = '<p class="exito">' + escaparHtml(r.mensaje) + '</p>' + htmlTicket(r.ticket) +
+                    '<button type="button" class="boton" onclick="window.print()">Imprimir ticket</button>';
             } else {
                 div.innerHTML = '<p class="aviso">' + escaparHtml(r.mensaje) + '</p>';
             }

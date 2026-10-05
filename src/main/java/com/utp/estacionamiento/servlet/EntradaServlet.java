@@ -39,6 +39,9 @@ public class EntradaServlet extends HttpServlet {
             respuesta.put("idTicket", r.idTicket);
             respuesta.put("numeroEspacio", r.numeroEspacio);
             respuesta.put("mensaje", r.mensaje);
+            if (r.asignado) {
+                respuesta.put("ticket", servicio.detalleTicket(r.idTicket)); // datos para imprimir el ticket
+            }
         } catch (SQLException e) {
             respuesta.put("error", "Error de base de datos: " + e.getMessage());
         } catch (Exception e) {

@@ -105,3 +105,26 @@ main.panel-inicio { max-width: 1100px; }
 /* Detalle tecnico plegado (para la exposicion) */
 .detalle-tecnico { margin-top: 16px; font-size: 13px; color: #475569; }
 .detalle-tecnico summary { cursor: pointer; }
+
+/* Ticket de entrada y resumen de cobro */
+.ticket { background: #fff; border: 2px dashed #94a3b8; border-radius: 8px; padding: 16px 20px; margin: 12px 0; max-width: 360px; }
+.ticket-titulo { font-size: 13px; letter-spacing: 3px; color: #64748b; text-align: center; }
+.ticket-numero { font-size: 26px; font-weight: bold; text-align: center; margin: 6px 0 10px; }
+.ticket .ficha-placa { display: block; text-align: center; }
+.ticket-datos { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+.ticket-datos td { padding: 4px 0; border: none; background: none; }
+.ticket-datos td:first-child { color: #64748b; width: 40%; }
+.ticket-pie { margin-top: 12px; font-size: 12px; color: #64748b; text-align: center; }
+.total { margin-top: 10px; font-size: 20px; font-weight: bold; color: #16a34a; }
+#formCobro .ficha { margin-bottom: 4px; }
+button.boton { width: auto; border: none; cursor: pointer; font-size: 14px; }
+.estado-dentro { color: #16a34a; font-weight: bold; text-decoration: none; white-space: nowrap; }
+.estado-dentro:hover { text-decoration: underline; }
+.estado-fuera { color: #94a3b8; }
+
+/* Al imprimir solo sale el ticket */
+@media print {
+    body * { visibility: hidden; }
+    #ticketImprimible, #ticketImprimible * { visibility: visible; }
+    #ticketImprimible { position: absolute; left: 0; top: 0; border: 1px dashed #000; }
+}
