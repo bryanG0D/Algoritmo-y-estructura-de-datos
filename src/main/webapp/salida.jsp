@@ -14,7 +14,6 @@
     <form id="formConsulta">
         <label>Numero de ticket o placa</label>
         <input type="text" id="consulta" placeholder="Ej. 31 o ABC-123" autocomplete="off" required>
-        <p class="nota">Si el cliente perdio su ticket, escriba la placa.</p>
         <button type="submit">Buscar</button>
     </form>
 
