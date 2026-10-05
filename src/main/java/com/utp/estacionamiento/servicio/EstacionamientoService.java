@@ -136,6 +136,31 @@ public class EstacionamientoService {
         return resultado;
     }
 
+    // CRUD de vehiculos: cada cambio se guarda en MySQL y se refleja en el Arbol AVL,
+    // asi la busqueda por placa siempre coincide con la base de datos.
+
+    public synchronized void crearVehiculo(Vehiculo v) throws SQLException {
+        vehiculoDAO.insertar(v);
+        arbolPlacas.insertar(v);
+    }
+
+    public synchronized void actualizarVehiculo(Vehiculo v) throws SQLException {
+        Vehiculo anterior = vehiculoDAO.buscarPorId(v.getIdVehiculo());
+        vehiculoDAO.actualizar(v);
+        if (anterior != null && !anterior.getPlaca().equals(v.getPlaca())) {
+            arbolPlacas.eliminar(anterior.getPlaca()); // cambio la placa: sale la clave vieja
+        }
+        arbolPlacas.insertar(v);
+    }
+
+    public synchronized void eliminarVehiculo(int idVehiculo) throws SQLException {
+        Vehiculo v = vehiculoDAO.buscarPorId(idVehiculo);
+        vehiculoDAO.eliminar(idVehiculo);
+        if (v != null) {
+            arbolPlacas.eliminar(v.getPlaca());
+        }
+    }
+
     public Vehiculo buscarVehiculoEnMemoria(String placa) {
         return arbolPlacas.buscarPorPlaca(placa);
     }

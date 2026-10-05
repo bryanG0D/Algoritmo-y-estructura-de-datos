@@ -266,17 +266,17 @@ const PAGINAS = [
         nota: 'Todos los Servlets usan GsonProvider para responder JSON (no se dibuja). El detalle de los DAO esta en la pagina 3 y el de EstacionamientoService en la 5.',
         celdas: [
             [0, 4, 'HttpServlet', { nota: 'javax.servlet.http' }],
-            [1, 0, 'LoginServlet'], [1, 1, 'TipoVehiculoServlet'], [1, 2, 'VehiculoServlet'], [1, 3, 'ReporteServlet'], [1, 4, 'LogoutServlet'],
+            [1, 0, 'LoginServlet'], [1, 1, 'TipoVehiculoServlet'], [1, 2, 'ReporteServlet'], [1, 3, 'LogoutServlet'], [1, 4, 'VehiculoServlet'],
             [1, 5, 'EntradaServlet'], [1, 6, 'SalidaServlet'], [1, 7, 'BusquedaServlet'], [1, 8, 'MapaServlet'], [1, 9, 'ResumenServlet'],
-            [2, 0, 'UsuarioDAO', COMPACTA], [2, 1, 'TipoVehiculoDAO', COMPACTA], [2, 2, 'VehiculoDAO', COMPACTA], [2, 3, 'PagoDAO', COMPACTA],
+            [2, 0, 'UsuarioDAO', COMPACTA], [2, 1, 'TipoVehiculoDAO', COMPACTA], [2, 2, 'PagoDAO', COMPACTA],
             [2, 7, 'EstacionamientoService', COMPACTA],
         ],
         relaciones: [
             ...['Login', 'TipoVehiculo', 'Vehiculo', 'Reporte', 'Logout', 'Entrada', 'Salida', 'Busqueda', 'Mapa', 'Resumen']
                 .map(s => [s + 'Servlet', 'HttpServlet', 'herencia']),
             ['LoginServlet', 'UsuarioDAO', 'asociacion'], ['TipoVehiculoServlet', 'TipoVehiculoDAO', 'asociacion'],
-            ['VehiculoServlet', 'VehiculoDAO', 'asociacion'], ['ReporteServlet', 'PagoDAO', 'asociacion'],
-            ...['Entrada', 'Salida', 'Busqueda', 'Mapa', 'Resumen'].map(s => [s + 'Servlet', 'EstacionamientoService', 'dependencia']),
+            ['ReporteServlet', 'PagoDAO', 'asociacion'],
+            ...['Vehiculo', 'Entrada', 'Salida', 'Busqueda', 'Mapa', 'Resumen'].map(s => [s + 'Servlet', 'EstacionamientoService', 'dependencia']),
         ],
     },
     {

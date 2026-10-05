@@ -110,7 +110,7 @@ usaria un algoritmo como BCrypt.
 | Registrar salida | Cobra segun la tarifa del tipo de vehiculo (Auto / Camioneta S/ 4, Moto S/ 2, Bicicleta S/ 1 por hora) y libera el espacio |
 | Inicio | Resumen de ocupacion (Matriz), cobrado hoy y busqueda rapida por placa: consulta el **Arbol AVL en memoria** (O(log n)) y muestra donde esta el vehiculo, con boton para registrar su salida (cliente que perdio el ticket) |
 | Mapa del estacionamiento | Dibuja la **Matriz 2D** (5x10) con el estado real de cada espacio |
-| Vehiculos | CRUD completo (Crear, Leer, Actualizar, Eliminar) usando el patron DAO |
+| Vehiculos | CRUD completo (Crear, Leer, Actualizar, Eliminar) usando el patron DAO. Cada cambio pasa por `EstacionamientoService`, que tambien actualiza el **Arbol AVL** (inserta, cambia la placa o la elimina), asi la busqueda coincide siempre con la base. Solo placa y tipo son obligatorios |
 | Reporte de ingresos | Llama al procedimiento almacenado parametrizado por rango de fechas |
 
 ## 7. Estructura del proyecto

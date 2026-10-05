@@ -25,6 +25,7 @@
         <input type="text" name="color" id="color" maxlength="20">
         <button type="submit" id="botonGuardar">Agregar</button>
     </form>
+    <div id="mensaje"></div>
 
     <table id="tablaVehiculos">
         <thead>
@@ -59,7 +60,7 @@ function cargarVehiculos() {
                 const btnEliminar = document.createElement('button');
                 btnEliminar.type = 'button';
                 btnEliminar.textContent = 'Eliminar';
-                btnEliminar.onclick = () => eliminarVehiculo(v.idVehiculo);
+                btnEliminar.onclick = () => eliminarVehiculo(v.idVehiculo, v.placa);
                 celdaAcciones.appendChild(btnEliminar);
 
                 tbody.appendChild(fila);
@@ -77,11 +78,19 @@ function cargarEnFormulario(v) {
     document.getElementById('botonGuardar').textContent = 'Actualizar';
 }
 
-function eliminarVehiculo(id) {
+function eliminarVehiculo(id, placa) {
+    if (!confirm('Eliminar el vehiculo ' + placa + '?')) return;
     const datos = new URLSearchParams();
     datos.append('accion', 'eliminar');
     datos.append('idVehiculo', id);
-    fetch('vehiculos', { method: 'POST', body: datos }).then(cargarVehiculos);
+    fetch('vehiculos', { method: 'POST', body: datos })
+        .then(r => r.json())
+        .then(r => { mostrarMensaje(r); cargarVehiculos(); });
+}
+
+function mostrarMensaje(r) {
+    document.getElementById('mensaje').innerHTML =
+        '<p class="' + (r.exito ? 'exito' : 'error') + '">' + escaparHtml(r.mensaje) + '</p>';
 }
 
 document.getElementById('formVehiculo').addEventListener('submit', function (e) {
@@ -92,7 +101,9 @@ document.getElementById('formVehiculo').addEventListener('submit', function (e) 
 
     fetch('vehiculos', { method: 'POST', body: datos })
         .then(r => r.json())
-        .then(() => {
+        .then(r => {
+            mostrarMensaje(r);
+            if (!r.exito) return;
             e.target.reset();
             document.getElementById('idVehiculo').value = '';
             document.getElementById('botonGuardar').textContent = 'Agregar';
