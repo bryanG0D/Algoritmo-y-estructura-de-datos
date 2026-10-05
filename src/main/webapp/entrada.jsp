@@ -19,10 +19,6 @@
         <select name="idTipo" id="idTipo" required></select>
         <label>Marca <span class="opcional">(opcional)</span></label>
         <input type="text" name="marca" id="marca" maxlength="30">
-        <label>Modelo <span class="opcional">(opcional)</span></label>
-        <input type="text" name="modelo" id="modelo" maxlength="30">
-        <label>Color <span class="opcional">(opcional)</span></label>
-        <input type="text" name="color" id="color" maxlength="20">
         <button type="submit" id="botonRegistrar">Registrar</button>
     </form>
     <div id="resultado"></div>
@@ -43,7 +39,7 @@ campoPlaca.addEventListener('change', function () {
     avisoPlaca.textContent = '';
     botonRegistrar.disabled = false;
     if (datosAutocompletados) {
-        ['marca', 'modelo', 'color'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('marca').value = '';
         datosAutocompletados = false;
     }
     if (!placa) return;
@@ -54,8 +50,6 @@ campoPlaca.addEventListener('change', function () {
             if (!r.encontrado) return;
             const v = r.vehiculo;
             document.getElementById('marca').value = v.marca || '';
-            document.getElementById('modelo').value = v.modelo || '';
-            document.getElementById('color').value = v.color || '';
             document.getElementById('idTipo').value = v.idTipo;
             datosAutocompletados = true;
             if (r.ticketActivo) {

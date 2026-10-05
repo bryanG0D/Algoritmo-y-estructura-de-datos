@@ -25,7 +25,7 @@
             <p class="nota">
                 <span class="celda libre"></span> Libre
                 <span class="celda ocupado"></span> Ocupado
-                &nbsp; Columna 10 (borde azul): motos y bicicletas
+                &nbsp; Borde azul: motos y bicicletas
             </p>
             <a href="mapa.jsp">Ver mapa completo &rarr;</a>
         </div>

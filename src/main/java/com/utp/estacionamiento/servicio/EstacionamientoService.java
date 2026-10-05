@@ -69,8 +69,8 @@ public class EstacionamientoService {
         public String mensaje;
     }
 
-    public synchronized ResultadoRegistro registrarEntrada(String placa, String marca, String modelo,
-                                                           String color, int idTipo, int idUsuario)
+    public synchronized ResultadoRegistro registrarEntrada(String placa, String marca,
+                                                           int idTipo, int idUsuario)
             throws SQLException {
         ResultadoRegistro resultado = new ResultadoRegistro();
 
@@ -90,7 +90,7 @@ public class EstacionamientoService {
             }
 
             ResultadoEntrada r = ticketDAO.registrarEntrada(
-                    placa, marca, modelo, color, idTipo, idUsuario, espacio.getIdEspacio());
+                    placa, marca, idTipo, idUsuario, espacio.getIdEspacio());
             actualizarArbol(placa);
 
             if (r.fueAsignado()) {

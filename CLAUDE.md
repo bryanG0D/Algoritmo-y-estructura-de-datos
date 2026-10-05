@@ -22,7 +22,10 @@ presenta un plan con la lista de archivos que vas a tocar y espera el OK.
   `vehiculo`, `espacio_estacionamiento`, `ticket`, `pago`. No agregues,
   quites ni modifiques tablas o columnas: cualquier cambio de esquema necesita
   nueva aprobacion del docente. Los procedimientos almacenados si se pueden
-  modificar.
+  modificar. **Excepcion decidida por el usuario (2026-10-04):** se quitaron
+  `vehiculo.modelo` y `vehiculo.color` (no se usan en un estacionamiento real);
+  el usuario lo comunicara al docente. `vehiculo` queda con placa, marca
+  (opcional) e id_tipo. El PNG del E-R aprobado aun muestra esas columnas.
 - La tarifa vive en `tipo_vehiculo` (`precio_hora`, `precio_fraccion`,
   `vigente_desde`). `espacio_estacionamiento.id_zona` es un INT descriptivo
   sin FK. `ticket.id_espacio` es NOT NULL: un ticket solo existe si el
@@ -34,6 +37,12 @@ presenta un plan con la lista de archivos que vas a tocar y espera el OK.
 - Credenciales de MySQL en `src/main/resources/db.properties` (plantilla:
   `db.properties.example`). Nunca escribas credenciales en el codigo ni
   muestres la contrasena en tus respuestas.
+- **Base en la nube (Aiven, MySQL 8.4)** desde 2026-10-04: `db.properties` apunta
+  ahi (`sslMode=REQUIRED` y `sessionVariables=time_zone='-05:00'`, porque el
+  servidor esta en UTC y sin eso las fechas y el reporte del dia salen mal).
+  La base local se recreo limpia con el mismo script (sus credenciales ya no
+  estan en `db.properties`). Para conectarte por consola: `mysql -h <host>
+  -P <puerto> -u avnadmin --ssl-mode=REQUIRED` con `MYSQL_PWD` leido del archivo.
 
 ## Estructuras de datos (lo que el docente evalua)
 
@@ -61,8 +70,8 @@ Ya esta hecho y probado contra una base real. NO lo vuelvas a implementar:
 - `MatrizEstacionamiento.buscarEspacioEnFilaMasLibre`: elige la fila con mas
   espacios libres del tipo pedido (empate: menor fila) y devuelve su primer
   espacio libre.
-- `sp_registrar_entrada(placa, marca, modelo, color, id_tipo, id_usuario,
-  id_espacio, OUT id_ticket)`: recibe el espacio elegido por Java, busca o
+- `sp_registrar_entrada(placa, marca, id_tipo, id_usuario, id_espacio,
+  OUT id_ticket)`: recibe el espacio elegido por Java, busca o
   crea el vehiculo, ocupa el espacio solo si sigue LIBRE y crea el ticket.
   Si no estaba libre devuelve NULL; el servicio lo marca ocupado y reintenta
   una vez.

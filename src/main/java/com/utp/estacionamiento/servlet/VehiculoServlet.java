@@ -94,13 +94,11 @@ public class VehiculoServlet extends HttpServlet {
         Vehiculo v = new Vehiculo();
         v.setPlaca(req.getParameter("placa").trim().toUpperCase());
         v.setMarca(opcional(req.getParameter("marca")));
-        v.setModelo(opcional(req.getParameter("modelo")));
-        v.setColor(opcional(req.getParameter("color")));
         v.setIdTipo(Integer.parseInt(req.getParameter("idTipo")));
         return v;
     }
 
-    /** Marca, modelo y color son opcionales: si llegan vacios se guardan como NULL. */
+    /** La marca es opcional: si llega vacia se guarda como NULL. */
     private static String opcional(String valor) {
         return (valor == null || valor.trim().isEmpty()) ? null : valor.trim();
     }

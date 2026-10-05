@@ -1,6 +1,6 @@
 -- =========================================================
--- SISTEMA DE ESTACIONAMIENTO INTELIGENTE
--- Script de creacion de base de datos (version final aprobada)
+-- SISTEMA DE ESTACIONAMIENTO
+-- Script de creacion de la base de datos
 -- Algoritmos y Estructuras de Datos - UTP
 -- =========================================================
 
@@ -35,8 +35,6 @@ CREATE TABLE vehiculo (
     id_vehiculo  INT AUTO_INCREMENT PRIMARY KEY,
     placa        VARCHAR(10) NOT NULL UNIQUE,
     marca        VARCHAR(30),
-    modelo       VARCHAR(30),
-    color        VARCHAR(20),
     id_tipo      INT NOT NULL,
     CONSTRAINT fk_vehiculo_tipo FOREIGN KEY (id_tipo)
         REFERENCES tipo_vehiculo(id_tipo)
@@ -44,7 +42,7 @@ CREATE TABLE vehiculo (
 
 CREATE TABLE espacio_estacionamiento (
     id_espacio          INT AUTO_INCREMENT PRIMARY KEY,
-    id_zona             INT NOT NULL,  -- dato descriptivo (sin FK: ZonaEstacionamiento ya no existe)
+    id_zona             INT NOT NULL,  -- zona del estacionamiento (dato descriptivo)
     numero_espacio      VARCHAR(10) NOT NULL,
     fila                INT NOT NULL,
     columna             INT NOT NULL,
@@ -58,7 +56,7 @@ CREATE TABLE espacio_estacionamiento (
 CREATE TABLE ticket (
     id_ticket             INT AUTO_INCREMENT PRIMARY KEY,
     id_vehiculo           INT NOT NULL,
-    id_espacio            INT NOT NULL,  -- la cola FIFO vive en memoria (Java); solo se persiste cuando ya hay espacio
+    id_espacio            INT NOT NULL,  -- un ticket solo existe si el vehiculo ya tiene espacio
     id_usuario_registro   INT NOT NULL,
     fecha_hora_entrada    DATETIME NOT NULL,
     fecha_hora_salida     DATETIME NULL,
@@ -86,7 +84,7 @@ CREATE TABLE pago (
 ) ENGINE=InnoDB;
 
 -- =========================================================
--- DATOS INICIALES (tipo_vehiculo: 3 categorias segun el espacio; resto: minimo 20 filas)
+-- DATOS INICIALES
 -- =========================================================
 
 INSERT INTO tipo_vehiculo (nombre, descripcion, precio_hora, precio_fraccion, vigente_desde) VALUES
@@ -116,32 +114,32 @@ INSERT INTO usuario (nombre, usuario_login, contrasena_hash, rol) VALUES
 ('Fernando Cruz', 'fernando.cru19', '$2y$10$hashdemo019abcdefghijklmnopqrstuvwx', 'GUARDIA'),
 ('Monica Silva', 'monica.sil20', '$2y$10$hashdemo020abcdefghijklmnopqrstuvwx', 'GUARDIA');
 
-INSERT INTO vehiculo (placa, marca, modelo, color, id_tipo) VALUES
-('RGW-765', 'Toyota', 'Yaris', 'Plateado', 1),
-('W8N-325', 'Toyota', 'Corolla', 'Rojo', 1),
-('O9I-928', 'Kia', 'Rio', 'Rojo', 1),
-('AYZ-263', 'Hyundai', 'Accent', 'Plateado', 1),
-('W6K-384', 'Nissan', 'Versa', 'Rojo', 1),
-('E3Y-444', 'Suzuki', 'Swift', 'Negro', 1),
-('DCM-199', 'Chevrolet', 'Sail', 'Gris', 1),
-('L5T-370', 'Honda', 'Civic', 'Negro', 1),
-('Z0X-570', 'Kia', 'Sportage', 'Negro', 1),
-('RDM-180', 'Hyundai', 'Tucson', 'Plateado', 1),
-('R4U-733', 'Toyota', 'Hilux', 'Azul', 1),
-('L9G-821', 'Nissan', 'Frontier', 'Azul', 1),
-('CBV-333', 'Yamaha', 'YBR125', 'Gris', 2),
-('Y4C-975', 'Honda', 'CB190', 'Plateado', 2),
-('H1M-384', 'Bajaj', 'Boxer', 'Azul', 2),
-('OUL-266', 'Volkswagen', 'Amarok', 'Rojo', 1),
-('L5G-786', 'Mitsubishi', 'Montero', 'Azul', 1),
-('I1T-750', 'Toyota', 'RAV4', 'Rojo', 1),
-('FRX-350', 'Kia', 'Picanto', 'Gris', 1),
-('F7M-376', 'Suzuki', 'Alto', 'Negro', 1),
-('U8H-801', 'Chevrolet', 'Spark', 'Negro', 1),
-('KYY-157', 'Hyundai', 'Elantra', 'Azul', 1),
-('H0Z-423', 'Nissan', 'Sentra', 'Rojo', 1),
-('M4C-316', 'Honda', 'HR-V', 'Blanco', 1),
-('SWK-317', 'Toyota', 'Etios', 'Verde', 1);
+INSERT INTO vehiculo (placa, marca, id_tipo) VALUES
+('RGW-765', 'Toyota', 1),
+('W8N-325', 'Toyota', 1),
+('O9I-928', 'Kia', 1),
+('AYZ-263', 'Hyundai', 1),
+('W6K-384', 'Nissan', 1),
+('E3Y-444', 'Suzuki', 1),
+('DCM-199', 'Chevrolet', 1),
+('L5T-370', 'Honda', 1),
+('Z0X-570', 'Kia', 1),
+('RDM-180', 'Hyundai', 1),
+('R4U-733', 'Toyota', 1),
+('L9G-821', 'Nissan', 1),
+('CBV-333', 'Yamaha', 2),
+('Y4C-975', 'Honda', 2),
+('H1M-384', 'Bajaj', 2),
+('OUL-266', 'Volkswagen', 1),
+('L5G-786', 'Mitsubishi', 1),
+('I1T-750', 'Toyota', 1),
+('FRX-350', 'Kia', 1),
+('F7M-376', 'Suzuki', 1),
+('U8H-801', 'Chevrolet', 1),
+('KYY-157', 'Hyundai', 1),
+('H0Z-423', 'Nissan', 1),
+('M4C-316', 'Honda', 1),
+('SWK-317', 'Toyota', 1);
 
 INSERT INTO espacio_estacionamiento (id_zona, numero_espacio, fila, columna, estado, id_tipo_permitido) VALUES
 (1, 'E-101', 1, 1, 'LIBRE', 1),
@@ -277,8 +275,6 @@ DELIMITER $$
 CREATE PROCEDURE sp_registrar_entrada (
     IN  p_placa       VARCHAR(10),
     IN  p_marca       VARCHAR(30),
-    IN  p_modelo      VARCHAR(30),
-    IN  p_color       VARCHAR(20),
     IN  p_id_tipo     INT,
     IN  p_id_usuario  INT,
     IN  p_id_espacio  INT,
@@ -295,8 +291,8 @@ BEGIN
     FROM vehiculo WHERE placa = p_placa LIMIT 1;
 
     IF v_id_vehiculo IS NULL THEN
-        INSERT INTO vehiculo (placa, marca, modelo, color, id_tipo)
-        VALUES (p_placa, p_marca, p_modelo, p_color, p_id_tipo);
+        INSERT INTO vehiculo (placa, marca, id_tipo)
+        VALUES (p_placa, p_marca, p_id_tipo);
         SET v_id_vehiculo = LAST_INSERT_ID();
     END IF;
 
@@ -369,7 +365,7 @@ CREATE PROCEDURE sp_buscar_vehiculo_por_placa (
     IN p_placa VARCHAR(10)
 )
 BEGIN
-    SELECT v.id_vehiculo, v.placa, v.marca, v.modelo, v.color,
+    SELECT v.id_vehiculo, v.placa, v.marca,
            t.id_ticket, t.estado_ticket, e.numero_espacio
     FROM vehiculo v
     LEFT JOIN ticket t ON t.id_vehiculo = v.id_vehiculo

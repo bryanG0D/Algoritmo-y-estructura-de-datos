@@ -29,13 +29,11 @@ public class EntradaServlet extends HttpServlet {
 
             String placa = req.getParameter("placa").trim().toUpperCase();
             String marca = opcional(req.getParameter("marca"));
-            String modelo = opcional(req.getParameter("modelo"));
-            String color = opcional(req.getParameter("color"));
             int idTipo = Integer.parseInt(req.getParameter("idTipo"));
             int idUsuario = obtenerIdUsuarioSesion(req);
 
             EstacionamientoService.ResultadoRegistro r =
-                    servicio.registrarEntrada(placa, marca, modelo, color, idTipo, idUsuario);
+                    servicio.registrarEntrada(placa, marca, idTipo, idUsuario);
 
             respuesta.put("asignado", r.asignado);
             respuesta.put("idTicket", r.idTicket);
@@ -59,7 +57,7 @@ public class EntradaServlet extends HttpServlet {
         return 1; // usuario por defecto si no hay sesion activa
     }
 
-    /** Marca, modelo y color son opcionales: si llegan vacios se guardan como NULL. */
+    /** La marca es opcional: si llega vacia se guarda como NULL. */
     private static String opcional(String valor) {
         return (valor == null || valor.trim().isEmpty()) ? null : valor.trim();
     }

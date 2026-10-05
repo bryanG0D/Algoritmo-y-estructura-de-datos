@@ -19,17 +19,13 @@
         <select name="idTipo" id="idTipo" required></select>
         <label>Marca <span class="opcional">(opcional)</span></label>
         <input type="text" name="marca" id="marca" maxlength="30">
-        <label>Modelo <span class="opcional">(opcional)</span></label>
-        <input type="text" name="modelo" id="modelo" maxlength="30">
-        <label>Color <span class="opcional">(opcional)</span></label>
-        <input type="text" name="color" id="color" maxlength="20">
         <button type="submit" id="botonGuardar">Agregar</button>
     </form>
     <div id="mensaje"></div>
 
     <table id="tablaVehiculos">
         <thead>
-        <tr><th>Placa</th><th>Marca</th><th>Modelo</th><th>Color</th><th>Tipo</th><th>Acciones</th></tr>
+        <tr><th>Placa</th><th>Marca</th><th>Tipo</th><th>Acciones</th></tr>
         </thead>
         <tbody></tbody>
     </table>
@@ -47,7 +43,7 @@ function cargarVehiculos() {
             tbody.innerHTML = '';
             (r.vehiculos || []).forEach(v => {
                 const fila = document.createElement('tr');
-                fila.innerHTML = [v.placa, v.marca, v.modelo, v.color, v.nombreTipo]
+                fila.innerHTML = [v.placa, v.marca, v.nombreTipo]
                     .map(dato => '<td>' + (dato ? escaparHtml(dato) : '-') + '</td>').join('') + '<td></td>';
                 const celdaAcciones = fila.lastElementChild;
 
@@ -72,8 +68,6 @@ function cargarEnFormulario(v) {
     document.getElementById('idVehiculo').value = v.idVehiculo;
     document.getElementById('placa').value = v.placa;
     document.getElementById('marca').value = v.marca || '';
-    document.getElementById('modelo').value = v.modelo || '';
-    document.getElementById('color').value = v.color || '';
     document.getElementById('idTipo').value = v.idTipo;
     document.getElementById('botonGuardar').textContent = 'Actualizar';
 }

@@ -27,6 +27,19 @@ estructuras de datos en memoria: **Arbol AVL** (busqueda de placas) y
    usa `root` sin contrasena (lo tipico en XAMPP). En la consola veras cual
    de los dos casos se aplico al arrancar.
 
+### Base de datos compartida en la nube (Aiven)
+
+El grupo tiene la misma base creada en un MySQL en la nube (Aiven, plan
+gratuito), asi todos ven los mismos datos sin instalar MySQL:
+
+- En `db.properties` usa el bloque "Opcion nube" de `db.properties.example`.
+  El host, el puerto y la contrasena los da el encargado del grupo por
+  privado: **nunca** se escriben en el codigo ni se suben a GitHub.
+- Requiere internet. Si Aiven apaga el servicio por inactividad, se vuelve a
+  encender desde su consola (conviene revisarlo antes de la exposicion).
+- El mismo script `database/estacionamiento_inteligente.sql` crea la base en
+  la nube o en un MySQL local; no hay que cambiar nada del codigo.
+
 ## 3. Abrir el proyecto en Apache NetBeans
 
 1. `File > Open Project...` y selecciona la carpeta del proyecto (la que
@@ -110,7 +123,7 @@ usaria un algoritmo como BCrypt.
 | Registrar salida | Cobra segun la tarifa del tipo de vehiculo (Auto / Camioneta S/ 4, Moto S/ 2, Bicicleta S/ 1 por hora) y libera el espacio |
 | Inicio | Resumen de ocupacion (Matriz), cobrado hoy y busqueda rapida por placa: consulta el **Arbol AVL en memoria** (O(log n)) y muestra donde esta el vehiculo, con boton para registrar su salida (cliente que perdio el ticket) |
 | Mapa del estacionamiento | Dibuja la **Matriz 2D** (5x10) con el estado real de cada espacio |
-| Vehiculos | CRUD completo (Crear, Leer, Actualizar, Eliminar) usando el patron DAO. Cada cambio pasa por `EstacionamientoService`, que tambien actualiza el **Arbol AVL** (inserta, cambia la placa o la elimina), asi la busqueda coincide siempre con la base. Solo placa y tipo son obligatorios |
+| Vehiculos | CRUD completo (Crear, Leer, Actualizar, Eliminar) usando el patron DAO. Cada cambio pasa por `EstacionamientoService`, que tambien actualiza el **Arbol AVL** (inserta, cambia la placa o la elimina), asi la busqueda coincide siempre con la base. Solo placa y tipo son obligatorios; la marca es opcional (modelo y color se quitaron por no ser necesarios) |
 | Reporte de ingresos | Llama al procedimiento almacenado parametrizado por rango de fechas |
 
 ## 7. Estructura del proyecto
