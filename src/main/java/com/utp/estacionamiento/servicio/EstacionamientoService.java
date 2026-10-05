@@ -14,6 +14,7 @@ import com.utp.estacionamiento.dao.VehiculoDAO;
 import com.utp.estacionamiento.dao.VehiculoDAOImpl;
 import com.utp.estacionamiento.estructuras.ArbolAVL;
 import com.utp.estacionamiento.estructuras.MatrizEstacionamiento;
+import com.utp.estacionamiento.estructuras.ResultadoBusquedaAVL;
 import com.utp.estacionamiento.modelo.EspacioEstacionamiento;
 import com.utp.estacionamiento.modelo.Ticket;
 import com.utp.estacionamiento.modelo.TipoVehiculo;
@@ -21,6 +22,8 @@ import com.utp.estacionamiento.modelo.Vehiculo;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -68,14 +71,14 @@ public class EstacionamientoService {
         public String mensaje;
     }
 
-    public synchronized ResultadoRegistro registrarEntrada(String placa, String marca, String modelo,
-                                                           String color, int idTipo, int idUsuario)
+    public synchronized ResultadoRegistro registrarEntrada(String placa, String marca,
+                                                           int idTipo, int idUsuario)
             throws SQLException {
         ResultadoRegistro resultado = new ResultadoRegistro();
 
         // 1. Busqueda O(log n) en el Arbol AVL
         boolean yaConocido = arbolPlacas.buscarPorPlaca(placa) != null;
-        String prefijo = yaConocido ? "Vehiculo reconocido (Arbol AVL). " : "Vehiculo nuevo registrado. ";
+        String prefijo = yaConocido ? "Vehiculo ya registrado. " : "Vehiculo nuevo registrado. ";
 
         // 2. Regla de compatibilidad: a que clase de espacio puede ir
         int tipoEspacio = CompatibilidadEspacio.tipoDeEspacioPara(idTipo);
@@ -89,7 +92,7 @@ public class EstacionamientoService {
             }
 
             ResultadoEntrada r = ticketDAO.registrarEntrada(
-                    placa, marca, modelo, color, idTipo, idUsuario, espacio.getIdEspacio());
+                    placa, marca, idTipo, idUsuario, espacio.getIdEspacio());
             actualizarArbol(placa);
 
             if (r.fueAsignado()) {
@@ -97,9 +100,8 @@ public class EstacionamientoService {
                 resultado.asignado = true;
                 resultado.idTicket = r.getIdTicket();
                 resultado.numeroEspacio = espacio.getNumeroEspacio();
-                resultado.mensaje = prefijo + "Espacio " + espacio.getNumeroEspacio()
-                        + " asignado (fila " + espacio.getFila()
-                        + ", la que tenia mas lugares libres).";
+                resultado.mensaje = prefijo + "Asigne el espacio " + espacio.getNumeroEspacio()
+                        + " (fila " + espacio.getFila() + ").";
                 return resultado;
             }
             matriz.actualizarEstado(espacio.getIdEspacio(), "OCUPADO");
@@ -136,9 +138,42 @@ public class EstacionamientoService {
         return resultado;
     }
 
+    // CRUD de vehiculos: cada cambio se guarda en MySQL y se refleja en el Arbol AVL,
+    // asi la busqueda por placa siempre coincide con la base de datos.
+
+    public synchronized void crearVehiculo(Vehiculo v) throws SQLException {
+        vehiculoDAO.insertar(v);
+        arbolPlacas.insertar(v);
+    }
+
+    public synchronized void actualizarVehiculo(Vehiculo v) throws SQLException {
+        Vehiculo anterior = vehiculoDAO.buscarPorId(v.getIdVehiculo());
+        vehiculoDAO.actualizar(v);
+        if (anterior != null && !anterior.getPlaca().equals(v.getPlaca())) {
+            arbolPlacas.eliminar(anterior.getPlaca()); // cambio la placa: sale la clave vieja
+        }
+        arbolPlacas.insertar(v);
+    }
+
+    public synchronized void eliminarVehiculo(int idVehiculo) throws SQLException {
+        Vehiculo v = vehiculoDAO.buscarPorId(idVehiculo);
+        vehiculoDAO.eliminar(idVehiculo);
+        if (v != null) {
+            arbolPlacas.eliminar(v.getPlaca());
+        }
+    }
+
     public Vehiculo buscarVehiculoEnMemoria(String placa) {
         return arbolPlacas.buscarPorPlaca(placa);
     }
+
+    /** Busqueda en el AVL que ademas informa comparaciones y nodos visitados. */
+    public ResultadoBusquedaAVL buscarConRecorrido(String placa) {
+        return arbolPlacas.buscarConRecorrido(placa);
+    }
+
+    public int getTamanoArbol() { return arbolPlacas.tamano(); }
+    public int getAlturaArbol() { return arbolPlacas.altura(); }
 
     public Ticket buscarTicketActivoDeVehiculo(int idVehiculo) throws SQLException {
         for (Ticket t : ticketDAO.listarActivos()) {
@@ -147,6 +182,76 @@ public class EstacionamientoService {
             }
         }
         return null;
+    }
+
+    public List<Ticket> listarTicketsActivos() throws SQLException {
+        return ticketDAO.listarActivos();
+    }
+
+    /** Lo que se imprime en el ticket y se muestra antes de cobrar. */
+    public static class DetalleTicket {
+        public int idTicket;
+        public String placa;
+        public String marca;
+        public String nombreTipo;
+        public String numeroEspacio;
+        public int fila;
+        public LocalDateTime fechaHoraEntrada;
+        public BigDecimal precioHora;
+        public long horas;
+        public BigDecimal monto;
+    }
+
+    public DetalleTicket detalleTicket(int idTicket) throws SQLException {
+        Ticket t = ticketDAO.buscarPorId(idTicket);
+        return t == null ? null : detalleDe(t);
+    }
+
+    /**
+     * Busca el ticket ACTIVO por su numero o por la placa del vehiculo
+     * (cliente que perdio el ticket: la placa se busca en el Arbol AVL).
+     */
+    public DetalleTicket consultarTicketActivo(String consulta) throws SQLException {
+        String texto = consulta.trim().toUpperCase();
+        Ticket ticket;
+        if (texto.matches("\\d+")) {
+            ticket = ticketDAO.buscarPorId(Integer.parseInt(texto));
+        } else {
+            Vehiculo v = arbolPlacas.buscarPorPlaca(texto);
+            ticket = v == null ? null : buscarTicketActivoDeVehiculo(v.getIdVehiculo());
+        }
+        if (ticket == null || !"ACTIVO".equals(ticket.getEstadoTicket())) {
+            return null;
+        }
+        return detalleDe(ticket);
+    }
+
+    /** Monto a la fecha con la misma regla que sp_registrar_salida: horas redondeadas hacia arriba, minimo 1. */
+    private DetalleTicket detalleDe(Ticket t) throws SQLException {
+        DetalleTicket d = new DetalleTicket();
+        d.idTicket = t.getIdTicket();
+        d.fechaHoraEntrada = t.getFechaHoraEntrada();
+
+        Vehiculo v = vehiculoDAO.buscarPorId(t.getIdVehiculo());
+        d.placa = v.getPlaca();
+        d.marca = v.getMarca();
+        for (TipoVehiculo tipo : tipoVehiculoDAO.listarTodos()) {
+            if (tipo.getIdTipo() == v.getIdTipo()) {
+                d.nombreTipo = tipo.getNombre();
+                d.precioHora = tipo.getPrecioHora();
+            }
+        }
+
+        EspacioEstacionamiento espacio = matriz.buscarPorId(t.getIdEspacio());
+        if (espacio != null) {
+            d.numeroEspacio = espacio.getNumeroEspacio();
+            d.fila = espacio.getFila();
+        }
+
+        long minutos = Duration.between(t.getFechaHoraEntrada(), LocalDateTime.now()).toMinutes();
+        d.horas = Math.max(1, (minutos + 59) / 60);
+        d.monto = d.precioHora.multiply(BigDecimal.valueOf(d.horas));
+        return d;
     }
 
     public MatrizEstacionamiento getMatriz() { return matriz; }

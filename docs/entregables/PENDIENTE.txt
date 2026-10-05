@@ -1,5 +1,0 @@
-Aqui van los entregables que faltan:
-  - diagrama-clases-UML (.drawio o .png)
-  - documentacion (empresa, problematica, objetivos, alcance, requerimientos)
-  - diapositivas ProyectoG##.pptx y su PDF
-Borra este archivo cuando agregues el primero.

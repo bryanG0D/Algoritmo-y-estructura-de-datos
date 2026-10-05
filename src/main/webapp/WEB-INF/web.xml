@@ -5,11 +5,21 @@
          http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
 
-    <display-name>Sistema de Estacionamiento Inteligente</display-name>
+    <display-name>Sistema de Estacionamiento</display-name>
 
     <listener>
         <listener-class>com.utp.estacionamiento.util.AppContextListener</listener-class>
     </listener>
+
+    <!-- Exige sesion iniciada en todas las paginas y Servlets, salvo el login -->
+    <filter>
+        <filter-name>FiltroSesion</filter-name>
+        <filter-class>com.utp.estacionamiento.util.FiltroSesion</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>FiltroSesion</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
@@ -90,6 +100,15 @@
     <servlet-mapping>
         <servlet-name>ReporteServlet</servlet-name>
         <url-pattern>/reporte</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ResumenServlet</servlet-name>
+        <servlet-class>com.utp.estacionamiento.servlet.ResumenServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ResumenServlet</servlet-name>
+        <url-pattern>/resumen</url-pattern>
     </servlet-mapping>
 
     <welcome-file-list>

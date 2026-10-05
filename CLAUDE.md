@@ -22,7 +22,10 @@ presenta un plan con la lista de archivos que vas a tocar y espera el OK.
   `vehiculo`, `espacio_estacionamiento`, `ticket`, `pago`. No agregues,
   quites ni modifiques tablas o columnas: cualquier cambio de esquema necesita
   nueva aprobacion del docente. Los procedimientos almacenados si se pueden
-  modificar.
+  modificar. **Excepcion decidida por el usuario (2026-10-04):** se quitaron
+  `vehiculo.modelo` y `vehiculo.color` (no se usan en un estacionamiento real);
+  el usuario lo comunicara al docente. `vehiculo` queda con placa, marca
+  (opcional) e id_tipo. El PNG del E-R aprobado aun muestra esas columnas.
 - La tarifa vive en `tipo_vehiculo` (`precio_hora`, `precio_fraccion`,
   `vigente_desde`). `espacio_estacionamiento.id_zona` es un INT descriptivo
   sin FK. `ticket.id_espacio` es NOT NULL: un ticket solo existe si el
@@ -34,6 +37,12 @@ presenta un plan con la lista de archivos que vas a tocar y espera el OK.
 - Credenciales de MySQL en `src/main/resources/db.properties` (plantilla:
   `db.properties.example`). Nunca escribas credenciales en el codigo ni
   muestres la contrasena en tus respuestas.
+- **Base en la nube (Aiven, MySQL 8.4)** desde 2026-10-04: `db.properties` apunta
+  ahi (`sslMode=REQUIRED` y `sessionVariables=time_zone='-05:00'`, porque el
+  servidor esta en UTC y sin eso las fechas y el reporte del dia salen mal).
+  La base local se recreo limpia con el mismo script (sus credenciales ya no
+  estan en `db.properties`). Para conectarte por consola: `mysql -h <host>
+  -P <puerto> -u avnadmin --ssl-mode=REQUIRED` con `MYSQL_PWD` leido del archivo.
 
 ## Estructuras de datos (lo que el docente evalua)
 
@@ -61,8 +70,8 @@ Ya esta hecho y probado contra una base real. NO lo vuelvas a implementar:
 - `MatrizEstacionamiento.buscarEspacioEnFilaMasLibre`: elige la fila con mas
   espacios libres del tipo pedido (empate: menor fila) y devuelve su primer
   espacio libre.
-- `sp_registrar_entrada(placa, marca, modelo, color, id_tipo, id_usuario,
-  id_espacio, OUT id_ticket)`: recibe el espacio elegido por Java, busca o
+- `sp_registrar_entrada(placa, marca, id_tipo, id_usuario, id_espacio,
+  OUT id_ticket)`: recibe el espacio elegido por Java, busca o
   crea el vehiculo, ocupa el espacio solo si sigue LIBRE y crea el ticket.
   Si no estaba libre devuelve NULL; el servicio lo marca ocupado y reintenta
   una vez.
@@ -98,15 +107,43 @@ Ya esta hecho y probado contra una base real. NO lo vuelvas a implementar:
 
 ```
 modelo/       POJOs de las 6 entidades
-estructuras/  ArbolAVL, NodoAVL, MatrizEstacionamiento (sin cola de espera)
+estructuras/  ArbolAVL, NodoAVL, ResultadoBusquedaAVL, MatrizEstacionamiento (sin cola de espera)
 conexion/     ConexionBD (lee db.properties)
 dao/          Interfaz + Impl por entidad; TicketDAOImpl y PagoDAOImpl llaman a los procedimientos
 servicio/     EstacionamientoService (integra AVL + Matriz + DAO), CompatibilidadEspacio
-servlet/      Login, Logout, Entrada, Salida, Busqueda, Mapa, Vehiculo (CRUD), TipoVehiculo, Reporte
-util/         AppContextListener (inicializa el servicio), GsonProvider
-webapp/       JSP, css, js. Servlets registrados en WEB-INF/web.xml (sin anotaciones)
+servlet/      Login, Logout, Entrada, Salida, Busqueda, Mapa, Vehiculo (CRUD), TipoVehiculo, Reporte, Resumen
+util/         AppContextListener (inicializa el servicio), FiltroSesion, GsonProvider
+webapp/       JSP, css, js. Servlets y filtro registrados en WEB-INF/web.xml (sin anotaciones)
 database/     estacionamiento_inteligente.sql (unico script: crea todo)
+docs/         entregables/diagrama-clases.drawio (UML, 5 paginas; copia en Lucidchart) y herramientas/
 ```
+
+- **FiltroSesion** (`/*`): sin sesion, las JSP redirigen a `login.jsp` y los
+  Servlets responden 401 en JSON; `main.js` vuelve al login ante un 401.
+  `init()`/`destroy()` vacios son obligatorios: Jetty 9.4 usa Servlet 3.1.
+- **Interfaz para usuario final (no tecnica):** la app se llama
+  "Estacionamiento" (el docente pidio no usar "Inteligente"). Menu comun en
+  `WEB-INF/menu.jspf` (cada JSP define `paginaActual` y lo incluye). El inicio
+  (`index.jsp` + `/resumen`) muestra ocupacion (Matriz) y una busqueda rapida
+  por placa con ficha del vehiculo y boton "Registrar salida" (abre
+  `salida.jsp?ticket=N`). No existe `busqueda.jsp`. Entrada muestra un ticket imprimible
+  (`htmlTicket` en main.js, `@media print`); Salida acepta N.° de ticket o placa
+  (`GET /salida?consulta=`, `EstacionamientoService.consultarTicketActivo`) y
+  muestra el monto antes de cobrar (misma regla que `sp_registrar_salida`).
+  Vehiculos muestra columna Estado con el ticket activo. El recorrido del AVL
+  (`ArbolAVL.buscarConRecorrido`) va en un "Detalle tecnico" plegado que se
+  QUITA en el `.rar` final. No mostrar terminos como AVL/Matriz al usuario.
+- **UML:** `docs/entregables/diagrama-clases.drawio` se genera leyendo el
+  codigo con `node docs/herramientas/generar-diagrama-clases.js .`. Si cambia
+  el codigo, regenerarlo en vez de editarlo a mano.
+
+## Flujo de trabajo con git
+
+- `main` en GitHub es el respaldo estable: no se fusiona nada hasta que el
+  usuario lo pida. Se trabaja en `development`; commits locales y push solo
+  cuando el usuario lo indique.
+- El `.rar` final para el docente NO lleva `CLAUDE.md` (ni `docs/herramientas/`,
+  `db.properties`, `target/` o respaldos).
 
 ## Trampas conocidas
 
@@ -124,9 +161,8 @@ database/     estacionamiento_inteligente.sql (unico script: crea todo)
 
 1. Probar en NetBeans: F6 deberia levantar Jetty via `nbactions.xml`; si pide
    servidor, usar Tomcat 9.
-2. Diagrama de clases UML (entregable 3) como `.drawio` en `docs/entregables/`, reflejando
-   la estructura ya sin cola. Herramientas permitidas por la consigna:
-   StarUML, Rational, Draw.io, Lucidchart.
+2. ~~Diagrama de clases UML~~ HECHO (`docs/entregables/diagrama-clases.drawio`).
+   Falta exportarlo a PNG/PDF desde draw.io para las diapositivas.
 3. Documentacion (entregable 1) en `docs/entregables/documentacion.md`: empresa,
    problematica, objetivos, alcance, requerimientos funcionales.
 4. Diapositivas y PDF de la exposicion (`ProyectoG##.pptx` / `.pdf`).

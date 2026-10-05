@@ -3,12 +3,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ingresar - Estacionamiento Inteligente</title>
+    <title>Ingresar - Estacionamiento</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="contenedor-login">
-    <h1>Estacionamiento Inteligente</h1>
+    <h1>Estacionamiento</h1>
     <form id="formLogin">
         <label>Usuario</label>
         <input type="text" name="usuario" id="usuario" required>

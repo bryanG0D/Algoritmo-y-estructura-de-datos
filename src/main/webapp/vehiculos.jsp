@@ -1,10 +1,4 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%
-    if (session.getAttribute("usuario") == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
-%>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,29 +7,25 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header class="barra-superior">
-    <h1>Gestion de vehiculos</h1>
-    <a href="index.jsp" class="boton-salir">Volver</a>
-</header>
+<% String paginaActual = "vehiculos"; %>
+<%@ include file="/WEB-INF/menu.jspf" %>
 <main>
+    <h2 class="titulo-pagina">Gestion de vehiculos</h2>
     <form id="formVehiculo">
         <input type="hidden" name="idVehiculo" id="idVehiculo">
         <label>Placa</label>
-        <input type="text" name="placa" id="placa" required>
-        <label>Marca</label>
-        <input type="text" name="marca" id="marca" required>
-        <label>Modelo</label>
-        <input type="text" name="modelo" id="modelo" required>
-        <label>Color</label>
-        <input type="text" name="color" id="color" required>
+        <input type="text" name="placa" id="placa" maxlength="10" placeholder="Ej. ABC-123" autocomplete="off" required>
         <label>Tipo</label>
         <select name="idTipo" id="idTipo" required></select>
+        <label>Marca <span class="opcional">(opcional)</span></label>
+        <input type="text" name="marca" id="marca" maxlength="30">
         <button type="submit" id="botonGuardar">Agregar</button>
     </form>
+    <div id="mensaje"></div>
 
     <table id="tablaVehiculos">
         <thead>
-        <tr><th>Placa</th><th>Marca</th><th>Modelo</th><th>Color</th><th>Tipo</th><th>Acciones</th></tr>
+        <tr><th>Placa</th><th>Marca</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr>
         </thead>
         <tbody></tbody>
     </table>
@@ -43,6 +33,7 @@
 <script src="js/main.js"></script>
 <script>
 cargarTiposVehiculo('idTipo');
+normalizarPlaca(document.getElementById('placa'));
 
 function cargarVehiculos() {
     fetch('vehiculos')
@@ -50,10 +41,12 @@ function cargarVehiculos() {
         .then(r => {
             const tbody = document.querySelector('#tablaVehiculos tbody');
             tbody.innerHTML = '';
+            const activos = r.activos || {};
             (r.vehiculos || []).forEach(v => {
                 const fila = document.createElement('tr');
-                fila.innerHTML = '<td>' + v.placa + '</td><td>' + v.marca + '</td><td>' +
-                    v.modelo + '</td><td>' + v.color + '</td><td>' + v.nombreTipo + '</td><td></td>';
+                fila.innerHTML = [v.placa, v.marca, v.nombreTipo]
+                    .map(dato => '<td>' + (dato ? escaparHtml(dato) : '-') + '</td>').join('') +
+                    '<td>' + estadoVehiculo(activos[v.idVehiculo]) + '</td><td></td>';
                 const celdaAcciones = fila.lastElementChild;
 
                 const btnEditar = document.createElement('button');
@@ -65,7 +58,7 @@ function cargarVehiculos() {
                 const btnEliminar = document.createElement('button');
                 btnEliminar.type = 'button';
                 btnEliminar.textContent = 'Eliminar';
-                btnEliminar.onclick = () => eliminarVehiculo(v.idVehiculo);
+                btnEliminar.onclick = () => eliminarVehiculo(v.idVehiculo, v.placa);
                 celdaAcciones.appendChild(btnEliminar);
 
                 tbody.appendChild(fila);
@@ -73,21 +66,34 @@ function cargarVehiculos() {
         });
 }
 
+// Dentro: muestra su ticket activo (enlace a la salida) para validarlo con el que tiene el cliente.
+function estadoVehiculo(activo) {
+    if (!activo) return '<span class="estado-fuera">Fuera</span>';
+    return '<a class="estado-dentro" href="salida.jsp?ticket=' + activo.idTicket + '">Dentro &middot; Ticket N.&deg; ' +
+        activo.idTicket + ' &middot; ' + escaparHtml(activo.numeroEspacio) + '</a>';
+}
+
 function cargarEnFormulario(v) {
     document.getElementById('idVehiculo').value = v.idVehiculo;
     document.getElementById('placa').value = v.placa;
-    document.getElementById('marca').value = v.marca;
-    document.getElementById('modelo').value = v.modelo;
-    document.getElementById('color').value = v.color;
+    document.getElementById('marca').value = v.marca || '';
     document.getElementById('idTipo').value = v.idTipo;
     document.getElementById('botonGuardar').textContent = 'Actualizar';
 }
 
-function eliminarVehiculo(id) {
+function eliminarVehiculo(id, placa) {
+    if (!confirm('Eliminar el vehiculo ' + placa + '?')) return;
     const datos = new URLSearchParams();
     datos.append('accion', 'eliminar');
     datos.append('idVehiculo', id);
-    fetch('vehiculos', { method: 'POST', body: datos }).then(cargarVehiculos);
+    fetch('vehiculos', { method: 'POST', body: datos })
+        .then(r => r.json())
+        .then(r => { mostrarMensaje(r); cargarVehiculos(); });
+}
+
+function mostrarMensaje(r) {
+    document.getElementById('mensaje').innerHTML =
+        '<p class="' + (r.exito ? 'exito' : 'error') + '">' + escaparHtml(r.mensaje) + '</p>';
 }
 
 document.getElementById('formVehiculo').addEventListener('submit', function (e) {
@@ -98,7 +104,9 @@ document.getElementById('formVehiculo').addEventListener('submit', function (e) 
 
     fetch('vehiculos', { method: 'POST', body: datos })
         .then(r => r.json())
-        .then(() => {
+        .then(r => {
+            mostrarMensaje(r);
+            if (!r.exito) return;
             e.target.reset();
             document.getElementById('idVehiculo').value = '';
             document.getElementById('botonGuardar').textContent = 'Agregar';

@@ -1,5 +1,6 @@
 package com.utp.estacionamiento.util;
 
+import com.utp.estacionamiento.conexion.ConexionBD;
 import com.utp.estacionamiento.servicio.EstacionamientoService;
 
 import javax.servlet.ServletContextEvent;
@@ -26,5 +27,10 @@ public class AppContextListener implements ServletContextListener {
             throw new RuntimeException("Error al inicializar el servicio de estacionamiento. "
                     + "Verifica la conexion a MySQL en ConexionBD.java", e);
         }
+    }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        ConexionBD.cerrar();
     }
 }

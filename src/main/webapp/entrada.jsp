@@ -1,10 +1,4 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%
-    if (session.getAttribute("usuario") == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
-%>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,29 +7,60 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header class="barra-superior">
-    <h1>Registrar entrada</h1>
-    <a href="index.jsp" class="boton-salir">Volver</a>
-</header>
+<% String paginaActual = "entrada"; %>
+<%@ include file="/WEB-INF/menu.jspf" %>
 <main>
+    <h2 class="titulo-pagina">Registrar entrada</h2>
     <form id="formEntrada">
         <label>Placa</label>
-        <input type="text" name="placa" id="placa" required>
-        <label>Marca</label>
-        <input type="text" name="marca" id="marca" required>
-        <label>Modelo</label>
-        <input type="text" name="modelo" id="modelo" required>
-        <label>Color</label>
-        <input type="text" name="color" id="color" required>
+        <input type="text" name="placa" id="placa" maxlength="10" placeholder="Ej. ABC-123" autocomplete="off" required>
+        <p id="avisoPlaca" class="nota"></p>
         <label>Tipo de vehiculo</label>
         <select name="idTipo" id="idTipo" required></select>
-        <button type="submit">Registrar</button>
+        <label>Marca <span class="opcional">(opcional)</span></label>
+        <input type="text" name="marca" id="marca" maxlength="30">
+        <button type="submit" id="botonRegistrar">Registrar</button>
     </form>
     <div id="resultado"></div>
 </main>
 <script src="js/main.js"></script>
 <script>
 cargarTiposVehiculo('idTipo');
+
+const campoPlaca = document.getElementById('placa');
+const avisoPlaca = document.getElementById('avisoPlaca');
+const botonRegistrar = document.getElementById('botonRegistrar');
+let datosAutocompletados = false;
+normalizarPlaca(campoPlaca);
+
+// Al salir del campo placa: si el vehiculo ya vino antes, se rellenan sus datos.
+campoPlaca.addEventListener('change', function () {
+    const placa = campoPlaca.value.trim();
+    avisoPlaca.textContent = '';
+    botonRegistrar.disabled = false;
+    if (datosAutocompletados) {
+        document.getElementById('marca').value = '';
+        datosAutocompletados = false;
+    }
+    if (!placa) return;
+
+    fetch('buscar?placa=' + encodeURIComponent(placa))
+        .then(r => r.json())
+        .then(r => {
+            if (!r.encontrado) return;
+            const v = r.vehiculo;
+            document.getElementById('marca').value = v.marca || '';
+            document.getElementById('idTipo').value = v.idTipo;
+            datosAutocompletados = true;
+            if (r.ticketActivo) {
+                avisoPlaca.innerHTML = '<span class="error">Este vehiculo ya esta dentro (espacio ' +
+                    escaparHtml(r.numeroEspacio || '') + ', ticket N.&deg; ' + r.ticketActivo.idTicket + ').</span>';
+                botonRegistrar.disabled = true;
+            } else {
+                avisoPlaca.textContent = 'Vehiculo ya registrado: se cargaron sus datos.';
+            }
+        });
+});
 
 document.getElementById('formEntrada').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -46,14 +71,16 @@ document.getElementById('formEntrada').addEventListener('submit', function (e) {
         .then(r => {
             const div = document.getElementById('resultado');
             if (r.error) {
-                div.innerHTML = '<p class="error">' + r.error + '</p>';
+                div.innerHTML = '<p class="error">' + escaparHtml(r.error) + '</p>';
             } else if (r.asignado) {
-                div.innerHTML = '<p class="exito">Ticket #' + r.idTicket +
-                    ' creado. Espacio asignado: ' + r.numeroEspacio + '</p>';
+                div.innerHTML = '<p class="exito">' + escaparHtml(r.mensaje) + '</p>' + htmlTicket(r.ticket) +
+                    '<button type="button" class="boton" onclick="window.print()">Imprimir ticket</button>';
             } else {
-                div.innerHTML = '<p class="aviso">' + r.mensaje + '</p>';
+                div.innerHTML = '<p class="aviso">' + escaparHtml(r.mensaje) + '</p>';
             }
             e.target.reset();
+            avisoPlaca.textContent = '';
+            datosAutocompletados = false;
             cargarTiposVehiculo('idTipo');
         });
 });

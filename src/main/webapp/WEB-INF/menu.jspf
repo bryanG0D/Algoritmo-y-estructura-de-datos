@@ -1,0 +1,28 @@
+<%--
+  Cabecera y menu de navegacion comunes a todas las paginas.
+  Cada JSP define antes la variable paginaActual y luego hace:
+      <%@ include file="/WEB-INF/menu.jspf" %>
+  La sesion ya la garantiza FiltroSesion.
+--%>
+<%@ page import="com.utp.estacionamiento.modelo.Usuario" %>
+<%
+    Usuario usuarioSesion = (Usuario) session.getAttribute("usuario");
+    String[][] opcionesMenu = {
+        {"inicio", "index.jsp", "Inicio"},
+        {"entrada", "entrada.jsp", "Entrada"},
+        {"salida", "salida.jsp", "Salida"},
+        {"vehiculos", "vehiculos.jsp", "Vehiculos"},
+        {"mapa", "mapa.jsp", "Mapa"},
+        {"reporte", "reporte.jsp", "Reportes"},
+    };
+%>
+<header class="barra-superior">
+    <span class="marca">Estacionamiento</span>
+    <nav class="menu">
+        <% for (String[] op : opcionesMenu) { %>
+            <a href="<%= op[1] %>" class="<%= op[0].equals(paginaActual) ? "activo" : "" %>"><%= op[2] %></a>
+        <% } %>
+    </nav>
+    <span class="usuario"><%= usuarioSesion.getNombre() %> (<%= usuarioSesion.getRol() %>)</span>
+    <a href="logout" class="boton-salir">Salir</a>
+</header>

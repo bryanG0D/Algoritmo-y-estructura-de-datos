@@ -1,6 +1,6 @@
 -- =========================================================
--- SISTEMA DE ESTACIONAMIENTO INTELIGENTE
--- Script de creacion de base de datos (version final aprobada)
+-- SISTEMA DE ESTACIONAMIENTO
+-- Script de creacion de la base de datos
 -- Algoritmos y Estructuras de Datos - UTP
 -- =========================================================
 
@@ -9,6 +9,7 @@ CREATE DATABASE estacionamiento_inteligente
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_spanish2_ci;
 USE estacionamiento_inteligente;
+SET time_zone = '-05:00';  -- hora de Peru (los tickets activos se fechan con NOW())
 
 -- =========================================================
 -- TABLAS (orden respetando dependencias de llaves foraneas)
@@ -35,8 +36,6 @@ CREATE TABLE vehiculo (
     id_vehiculo  INT AUTO_INCREMENT PRIMARY KEY,
     placa        VARCHAR(10) NOT NULL UNIQUE,
     marca        VARCHAR(30),
-    modelo       VARCHAR(30),
-    color        VARCHAR(20),
     id_tipo      INT NOT NULL,
     CONSTRAINT fk_vehiculo_tipo FOREIGN KEY (id_tipo)
         REFERENCES tipo_vehiculo(id_tipo)
@@ -44,7 +43,7 @@ CREATE TABLE vehiculo (
 
 CREATE TABLE espacio_estacionamiento (
     id_espacio          INT AUTO_INCREMENT PRIMARY KEY,
-    id_zona             INT NOT NULL,  -- dato descriptivo (sin FK: ZonaEstacionamiento ya no existe)
+    id_zona             INT NOT NULL,  -- zona del estacionamiento (dato descriptivo)
     numero_espacio      VARCHAR(10) NOT NULL,
     fila                INT NOT NULL,
     columna             INT NOT NULL,
@@ -58,7 +57,7 @@ CREATE TABLE espacio_estacionamiento (
 CREATE TABLE ticket (
     id_ticket             INT AUTO_INCREMENT PRIMARY KEY,
     id_vehiculo           INT NOT NULL,
-    id_espacio            INT NOT NULL,  -- la cola FIFO vive en memoria (Java); solo se persiste cuando ya hay espacio
+    id_espacio            INT NOT NULL,  -- un ticket solo existe si el vehiculo ya tiene espacio
     id_usuario_registro   INT NOT NULL,
     fecha_hora_entrada    DATETIME NOT NULL,
     fecha_hora_salida     DATETIME NULL,
@@ -86,7 +85,7 @@ CREATE TABLE pago (
 ) ENGINE=InnoDB;
 
 -- =========================================================
--- DATOS INICIALES (tipo_vehiculo: 3 categorias segun el espacio; resto: minimo 20 filas)
+-- DATOS INICIALES
 -- =========================================================
 
 INSERT INTO tipo_vehiculo (nombre, descripcion, precio_hora, precio_fraccion, vigente_desde) VALUES
@@ -116,32 +115,32 @@ INSERT INTO usuario (nombre, usuario_login, contrasena_hash, rol) VALUES
 ('Fernando Cruz', 'fernando.cru19', '$2y$10$hashdemo019abcdefghijklmnopqrstuvwx', 'GUARDIA'),
 ('Monica Silva', 'monica.sil20', '$2y$10$hashdemo020abcdefghijklmnopqrstuvwx', 'GUARDIA');
 
-INSERT INTO vehiculo (placa, marca, modelo, color, id_tipo) VALUES
-('RGW-765', 'Toyota', 'Yaris', 'Plateado', 1),
-('W8N-325', 'Toyota', 'Corolla', 'Rojo', 1),
-('O9I-928', 'Kia', 'Rio', 'Rojo', 1),
-('AYZ-263', 'Hyundai', 'Accent', 'Plateado', 1),
-('W6K-384', 'Nissan', 'Versa', 'Rojo', 1),
-('E3Y-444', 'Suzuki', 'Swift', 'Negro', 1),
-('DCM-199', 'Chevrolet', 'Sail', 'Gris', 1),
-('L5T-370', 'Honda', 'Civic', 'Negro', 1),
-('Z0X-570', 'Kia', 'Sportage', 'Negro', 1),
-('RDM-180', 'Hyundai', 'Tucson', 'Plateado', 1),
-('R4U-733', 'Toyota', 'Hilux', 'Azul', 1),
-('L9G-821', 'Nissan', 'Frontier', 'Azul', 1),
-('CBV-333', 'Yamaha', 'YBR125', 'Gris', 2),
-('Y4C-975', 'Honda', 'CB190', 'Plateado', 2),
-('H1M-384', 'Bajaj', 'Boxer', 'Azul', 2),
-('OUL-266', 'Volkswagen', 'Amarok', 'Rojo', 1),
-('L5G-786', 'Mitsubishi', 'Montero', 'Azul', 1),
-('I1T-750', 'Toyota', 'RAV4', 'Rojo', 1),
-('FRX-350', 'Kia', 'Picanto', 'Gris', 1),
-('F7M-376', 'Suzuki', 'Alto', 'Negro', 1),
-('U8H-801', 'Chevrolet', 'Spark', 'Negro', 1),
-('KYY-157', 'Hyundai', 'Elantra', 'Azul', 1),
-('H0Z-423', 'Nissan', 'Sentra', 'Rojo', 1),
-('M4C-316', 'Honda', 'HR-V', 'Blanco', 1),
-('SWK-317', 'Toyota', 'Etios', 'Verde', 1);
+INSERT INTO vehiculo (placa, marca, id_tipo) VALUES
+('RGW-765', 'Toyota', 1),
+('W8N-325', 'Toyota', 1),
+('O9I-928', 'Kia', 1),
+('AYZ-263', 'Hyundai', 1),
+('W6K-384', 'Nissan', 1),
+('E3Y-444', 'Suzuki', 1),
+('DCM-199', 'Chevrolet', 1),
+('L5T-370', 'Honda', 1),
+('Z0X-570', 'Kia', 1),
+('RDM-180', 'Hyundai', 1),
+('R4U-733', 'Toyota', 1),
+('L9G-821', 'Nissan', 1),
+('CBV-333', 'Yamaha', 2),
+('Y4C-975', 'Honda', 2),
+('H1M-384', 'Bajaj', 2),
+('OUL-266', 'Volkswagen', 1),
+('L5G-786', 'Mitsubishi', 1),
+('I1T-750', 'Toyota', 1),
+('FRX-350', 'Kia', 1),
+('F7M-376', 'Suzuki', 1),
+('U8H-801', 'Chevrolet', 1),
+('KYY-157', 'Hyundai', 1),
+('H0Z-423', 'Nissan', 1),
+('M4C-316', 'Honda', 1),
+('SWK-317', 'Toyota', 1);
 
 INSERT INTO espacio_estacionamiento (id_zona, numero_espacio, fila, columna, estado, id_tipo_permitido) VALUES
 (1, 'E-101', 1, 1, 'LIBRE', 1),
@@ -196,66 +195,66 @@ INSERT INTO espacio_estacionamiento (id_zona, numero_espacio, fila, columna, est
 (5, 'E-510', 5, 10, 'LIBRE', 2);
 
 INSERT INTO ticket (id_vehiculo, id_espacio, id_usuario_registro, fecha_hora_entrada, fecha_hora_salida, estado_ticket, monto_total) VALUES
-(2, 16, 10, '2026-08-13 10:00:00', '2026-08-13 12:00:00', 'FINALIZADO', 13.50),
-(24, 42, 19, '2026-08-02 19:00:00', '2026-08-02 22:15:00', 'FINALIZADO', 24.00),
-(22, 2, 19, '2026-08-13 01:00:00', '2026-08-13 04:30:00', 'FINALIZADO', 18.00),
-(17, 12, 17, '2026-08-05 20:00:00', '2026-08-06 00:30:00', 'FINALIZADO', 30.00),
-(13, 37, 15, '2026-08-10 16:00:00', '2026-08-11 00:00:00', 'FINALIZADO', 18.00),
-(8, 33, 10, '2026-08-02 16:00:00', '2026-08-02 22:00:00', 'FINALIZADO', 31.50),
-(19, 19, 10, '2026-08-13 21:00:00', '2026-08-14 01:00:00', 'FINALIZADO', 22.50),
-(3, 29, 3, '2026-08-06 05:00:00', '2026-08-06 07:00:00', 'FINALIZADO', 13.50),
-(11, 26, 4, '2026-08-12 07:00:00', '2026-08-12 11:30:00', 'FINALIZADO', 22.50),
-(22, 46, 19, '2026-08-05 21:00:00', '2026-08-06 00:45:00', 'FINALIZADO', 18.00),
-(8, 23, 19, '2026-08-10 00:00:00', '2026-08-10 04:00:00', 'FINALIZADO', 22.50),
-(4, 27, 17, '2026-08-08 21:00:00', '2026-08-09 04:45:00', 'FINALIZADO', 36.00),
-(15, 13, 3, '2026-08-15 16:00:00', '2026-08-15 18:00:00', 'FINALIZADO', 6.00),
-(13, 21, 14, '2026-08-03 15:00:00', '2026-08-03 19:15:00', 'FINALIZADO', 10.00),
-(7, 3, 18, '2026-08-04 07:00:00', '2026-08-04 14:15:00', 'FINALIZADO', 36.00),
-(9, 7, 18, '2026-08-06 15:00:00', '2026-08-06 17:45:00', 'FINALIZADO', 18.00),
-(18, 20, 5, '2026-08-02 09:00:00', '2026-08-02 10:00:00', 'FINALIZADO', 12.00),
-(25, 38, 10, '2026-08-04 21:00:00', '2026-08-05 04:45:00', 'FINALIZADO', 36.00),
-(16, 31, 9, '2026-08-09 21:00:00', '2026-08-09 22:15:00', 'FINALIZADO', 9.00),
-(13, 32, 2, '2026-08-09 15:00:00', '2026-08-09 20:45:00', 'FINALIZADO', 12.00),
-(10, 45, 17, '2026-08-16 04:00:00', '2026-08-16 12:15:00', 'FINALIZADO', 54.00),
-(7, 36, 13, '2026-08-05 23:00:00', '2026-08-06 00:00:00', 'FINALIZADO', 9.00),
-(24, 9, 14, '2026-08-02 13:00:00', '2026-08-02 14:45:00', 'FINALIZADO', 12.00),
-(17, 40, 20, '2026-08-04 16:00:00', '2026-08-04 17:00:00', 'FINALIZADO', 12.00),
-(6, 24, 4, '2026-08-14 00:00:00', '2026-08-14 02:15:00', 'FINALIZADO', 13.50),
-(13, 35, 5, '2026-08-18 09:00:00', NULL, 'ACTIVO', NULL),
-(8, 15, 3, '2026-08-18 09:00:00', NULL, 'ACTIVO', NULL),
-(3, 6, 17, '2026-08-18 10:00:00', NULL, 'ACTIVO', NULL),
-(19, 14, 20, '2026-08-18 05:00:00', NULL, 'ACTIVO', NULL),
-(9, 48, 9, '2026-08-18 10:00:00', NULL, 'ACTIVO', NULL);
+(2, 16, 10, '2026-08-13 10:00:00', '2026-08-13 12:00:00', 'FINALIZADO', 8.00),
+(24, 42, 19, '2026-08-02 19:00:00', '2026-08-02 22:15:00', 'FINALIZADO', 16.00),
+(22, 2, 19, '2026-08-13 01:00:00', '2026-08-13 04:30:00', 'FINALIZADO', 16.00),
+(17, 12, 17, '2026-08-05 20:00:00', '2026-08-06 00:30:00', 'FINALIZADO', 20.00),
+(13, 30, 15, '2026-08-10 16:00:00', '2026-08-11 00:00:00', 'FINALIZADO', 16.00),
+(8, 33, 10, '2026-08-02 16:00:00', '2026-08-02 22:00:00', 'FINALIZADO', 24.00),
+(19, 19, 10, '2026-08-13 21:00:00', '2026-08-14 01:00:00', 'FINALIZADO', 16.00),
+(3, 29, 3, '2026-08-06 05:00:00', '2026-08-06 07:00:00', 'FINALIZADO', 8.00),
+(11, 26, 4, '2026-08-12 07:00:00', '2026-08-12 11:30:00', 'FINALIZADO', 20.00),
+(22, 46, 19, '2026-08-05 21:00:00', '2026-08-06 00:45:00', 'FINALIZADO', 16.00),
+(8, 23, 19, '2026-08-10 00:00:00', '2026-08-10 04:00:00', 'FINALIZADO', 16.00),
+(4, 27, 17, '2026-08-08 21:00:00', '2026-08-09 04:45:00', 'FINALIZADO', 32.00),
+(15, 10, 3, '2026-08-15 16:00:00', '2026-08-15 18:00:00', 'FINALIZADO', 4.00),
+(13, 20, 14, '2026-08-03 15:00:00', '2026-08-03 19:15:00', 'FINALIZADO', 10.00),
+(7, 3, 18, '2026-08-04 07:00:00', '2026-08-04 14:15:00', 'FINALIZADO', 32.00),
+(9, 7, 18, '2026-08-06 15:00:00', '2026-08-06 17:45:00', 'FINALIZADO', 12.00),
+(18, 21, 5, '2026-08-02 09:00:00', '2026-08-02 10:00:00', 'FINALIZADO', 4.00),
+(25, 38, 10, '2026-08-04 21:00:00', '2026-08-05 04:45:00', 'FINALIZADO', 32.00),
+(16, 31, 9, '2026-08-09 21:00:00', '2026-08-09 22:15:00', 'FINALIZADO', 8.00),
+(13, 40, 2, '2026-08-09 15:00:00', '2026-08-09 20:45:00', 'FINALIZADO', 12.00),
+(10, 45, 17, '2026-08-16 04:00:00', '2026-08-16 12:15:00', 'FINALIZADO', 36.00),
+(7, 36, 13, '2026-08-05 23:00:00', '2026-08-06 00:00:00', 'FINALIZADO', 4.00),
+(24, 9, 14, '2026-08-02 13:00:00', '2026-08-02 14:45:00', 'FINALIZADO', 8.00),
+(17, 32, 20, '2026-08-04 16:00:00', '2026-08-04 17:00:00', 'FINALIZADO', 4.00),
+(6, 24, 4, '2026-08-14 00:00:00', '2026-08-14 02:15:00', 'FINALIZADO', 12.00),
+(13, 50, 5, NOW() - INTERVAL 3 HOUR, NULL, 'ACTIVO', NULL),
+(8, 15, 3, NOW() - INTERVAL '2:15' HOUR_MINUTE, NULL, 'ACTIVO', NULL),
+(3, 6, 17, NOW() - INTERVAL '1:40' HOUR_MINUTE, NULL, 'ACTIVO', NULL),
+(19, 14, 20, NOW() - INTERVAL 45 MINUTE, NULL, 'ACTIVO', NULL),
+(9, 48, 9, NOW() - INTERVAL 20 MINUTE, NULL, 'ACTIVO', NULL);
 
 INSERT INTO pago (id_ticket, monto, metodo_pago, fecha_hora_pago, id_usuario_cobro) VALUES
-(1, 13.50, 'YAPE', '2026-08-13 12:00:00', 10),
-(2, 24.00, 'YAPE', '2026-08-02 22:15:00', 16),
-(3, 18.00, 'TARJETA', '2026-08-13 04:30:00', 13),
-(4, 30.00, 'PLIN', '2026-08-06 00:30:00', 14),
-(5, 18.00, 'EFECTIVO', '2026-08-11 00:00:00', 2),
-(6, 31.50, 'PLIN', '2026-08-02 22:00:00', 5),
-(7, 22.50, 'EFECTIVO', '2026-08-14 01:00:00', 9),
-(8, 13.50, 'YAPE', '2026-08-06 07:00:00', 6),
-(9, 22.50, 'YAPE', '2026-08-12 11:30:00', 4),
-(10, 18.00, 'TARJETA', '2026-08-06 00:45:00', 15),
-(11, 22.50, 'YAPE', '2026-08-10 04:00:00', 7),
-(12, 36.00, 'PLIN', '2026-08-09 04:45:00', 13),
-(13, 6.00, 'EFECTIVO', '2026-08-15 18:00:00', 13),
+(1, 8.00, 'YAPE', '2026-08-13 12:00:00', 10),
+(2, 16.00, 'YAPE', '2026-08-02 22:15:00', 16),
+(3, 16.00, 'TARJETA', '2026-08-13 04:30:00', 13),
+(4, 20.00, 'PLIN', '2026-08-06 00:30:00', 14),
+(5, 16.00, 'EFECTIVO', '2026-08-11 00:00:00', 2),
+(6, 24.00, 'PLIN', '2026-08-02 22:00:00', 5),
+(7, 16.00, 'EFECTIVO', '2026-08-14 01:00:00', 9),
+(8, 8.00, 'YAPE', '2026-08-06 07:00:00', 6),
+(9, 20.00, 'YAPE', '2026-08-12 11:30:00', 4),
+(10, 16.00, 'TARJETA', '2026-08-06 00:45:00', 15),
+(11, 16.00, 'YAPE', '2026-08-10 04:00:00', 7),
+(12, 32.00, 'PLIN', '2026-08-09 04:45:00', 13),
+(13, 4.00, 'EFECTIVO', '2026-08-15 18:00:00', 13),
 (14, 10.00, 'EFECTIVO', '2026-08-03 19:15:00', 6),
-(15, 36.00, 'YAPE', '2026-08-04 14:15:00', 5),
-(16, 18.00, 'EFECTIVO', '2026-08-06 17:45:00', 6),
-(17, 12.00, 'YAPE', '2026-08-02 10:00:00', 13),
-(18, 36.00, 'TARJETA', '2026-08-05 04:45:00', 14),
-(19, 9.00, 'TARJETA', '2026-08-09 22:15:00', 12),
+(15, 32.00, 'YAPE', '2026-08-04 14:15:00', 5),
+(16, 12.00, 'EFECTIVO', '2026-08-06 17:45:00', 6),
+(17, 4.00, 'YAPE', '2026-08-02 10:00:00', 13),
+(18, 32.00, 'TARJETA', '2026-08-05 04:45:00', 14),
+(19, 8.00, 'TARJETA', '2026-08-09 22:15:00', 12),
 (20, 12.00, 'PLIN', '2026-08-09 20:45:00', 12),
-(21, 54.00, 'EFECTIVO', '2026-08-16 12:15:00', 4),
-(22, 9.00, 'PLIN', '2026-08-06 00:00:00', 12),
-(23, 12.00, 'EFECTIVO', '2026-08-02 14:45:00', 2),
-(24, 12.00, 'YAPE', '2026-08-04 17:00:00', 6),
-(25, 13.50, 'YAPE', '2026-08-14 02:15:00', 7);
+(21, 36.00, 'EFECTIVO', '2026-08-16 12:15:00', 4),
+(22, 4.00, 'PLIN', '2026-08-06 00:00:00', 12),
+(23, 8.00, 'EFECTIVO', '2026-08-02 14:45:00', 2),
+(24, 4.00, 'YAPE', '2026-08-04 17:00:00', 6),
+(25, 12.00, 'YAPE', '2026-08-14 02:15:00', 7);
 
 -- Marcar como OCUPADO los espacios de los tickets actualmente ACTIVOS
-UPDATE espacio_estacionamiento SET estado='OCUPADO' WHERE id_espacio IN (35,15,6,14,48);
+UPDATE espacio_estacionamiento SET estado='OCUPADO' WHERE id_espacio IN (50,15,6,14,48);
 
 -- =========================================================
 -- PROCEDIMIENTOS ALMACENADOS
@@ -277,8 +276,6 @@ DELIMITER $$
 CREATE PROCEDURE sp_registrar_entrada (
     IN  p_placa       VARCHAR(10),
     IN  p_marca       VARCHAR(30),
-    IN  p_modelo      VARCHAR(30),
-    IN  p_color       VARCHAR(20),
     IN  p_id_tipo     INT,
     IN  p_id_usuario  INT,
     IN  p_id_espacio  INT,
@@ -295,8 +292,8 @@ BEGIN
     FROM vehiculo WHERE placa = p_placa LIMIT 1;
 
     IF v_id_vehiculo IS NULL THEN
-        INSERT INTO vehiculo (placa, marca, modelo, color, id_tipo)
-        VALUES (p_placa, p_marca, p_modelo, p_color, p_id_tipo);
+        INSERT INTO vehiculo (placa, marca, id_tipo)
+        VALUES (p_placa, p_marca, p_id_tipo);
         SET v_id_vehiculo = LAST_INSERT_ID();
     END IF;
 
@@ -369,7 +366,7 @@ CREATE PROCEDURE sp_buscar_vehiculo_por_placa (
     IN p_placa VARCHAR(10)
 )
 BEGIN
-    SELECT v.id_vehiculo, v.placa, v.marca, v.modelo, v.color,
+    SELECT v.id_vehiculo, v.placa, v.marca,
            t.id_ticket, t.estado_ticket, e.numero_espacio
     FROM vehiculo v
     LEFT JOIN ticket t ON t.id_vehiculo = v.id_vehiculo
