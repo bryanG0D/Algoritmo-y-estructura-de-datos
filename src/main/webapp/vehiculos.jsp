@@ -12,6 +12,7 @@
 <main>
     <h2 class="titulo-pagina">Gestion de vehiculos</h2>
     <form id="formVehiculo">
+        <p class="aviso-edicion" id="avisoEdicion" hidden></p>
         <input type="hidden" name="idVehiculo" id="idVehiculo">
         <label>Placa</label>
         <input type="text" name="placa" id="placa" maxlength="10" placeholder="Ej. ABC-123" autocomplete="off" required>
@@ -20,8 +21,8 @@
         <label>Marca <span class="opcional">(opcional)</span></label>
         <input type="text" name="marca" id="marca" maxlength="30">
         <button type="submit" id="botonGuardar">Agregar</button>
+        <button type="button" id="botonCancelar" class="boton-secundario" hidden>Cancelar edicion</button>
     </form>
-    <div id="mensaje"></div>
 
     <div class="barra-filtros">
         <label class="campo-filtro">Mostrar
@@ -90,6 +91,13 @@ function mostrarTabla() {
         btnEditar.textContent = 'Editar';
         btnEditar.onclick = () => cargarEnFormulario(v);
         fila.lastElementChild.appendChild(btnEditar);
+        if (activos[v.idVehiculo]) {
+            const btnTicket = document.createElement('button');
+            btnTicket.type = 'button';
+            btnTicket.textContent = 'Reimprimir ticket';
+            btnTicket.onclick = () => reimprimirTicket(activos[v.idVehiculo].idTicket);
+            fila.lastElementChild.appendChild(btnTicket);
+        }
         tbody.appendChild(fila);
     });
     if (visibles.length === 0) {
@@ -118,14 +126,29 @@ function cargarEnFormulario(v) {
     document.getElementById('placa').value = v.placa;
     document.getElementById('marca').value = v.marca || '';
     document.getElementById('idTipo').value = v.idTipo;
-    document.getElementById('botonGuardar').textContent = 'Actualizar';
+    document.getElementById('botonGuardar').textContent = 'Guardar cambios';
+    document.getElementById('botonCancelar').hidden = false;
+    const avisoEdicion = document.getElementById('avisoEdicion');
+    avisoEdicion.textContent = 'Editando el vehiculo ' + v.placa;
+    avisoEdicion.hidden = false;
+    document.getElementById('formVehiculo').classList.add('editando');
+    mostrarAviso('Editando el vehiculo ' + v.placa + '. Corrige los datos y pulsa "Guardar cambios".', 'info');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('placa').focus();
 }
 
-function mostrarMensaje(r) {
-    document.getElementById('mensaje').innerHTML =
-        '<p class="' + (r.exito ? 'exito' : 'error') + '">' + escaparHtml(r.mensaje) + '</p>';
+// Vuelve el formulario al modo "Agregar".
+function salirDeEdicion() {
+    const form = document.getElementById('formVehiculo');
+    form.reset();
+    form.classList.remove('editando');
+    document.getElementById('idVehiculo').value = '';
+    document.getElementById('botonGuardar').textContent = 'Agregar';
+    document.getElementById('botonCancelar').hidden = true;
+    document.getElementById('avisoEdicion').hidden = true;
 }
+
+document.getElementById('botonCancelar').addEventListener('click', salirDeEdicion);
 
 document.getElementById('formVehiculo').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -136,11 +159,12 @@ document.getElementById('formVehiculo').addEventListener('submit', function (e) 
     fetch('vehiculos', { method: 'POST', body: datos })
         .then(r => r.json())
         .then(r => {
-            mostrarMensaje(r);
-            if (!r.exito) return;
-            e.target.reset();
-            document.getElementById('idVehiculo').value = '';
-            document.getElementById('botonGuardar').textContent = 'Agregar';
+            if (!r.exito) { mostrarAviso(r.mensaje, 'error'); return; }
+            // Si el vehiculo esta dentro, se ofrece reimprimir su ticket con los datos corregidos.
+            const activo = idVehiculo && activos[idVehiculo];
+            mostrarAviso(r.mensaje + ' (' + datos.get('placa').toUpperCase() + ')', 'exito',
+                activo ? { texto: 'Reimprimir ticket', alHacerClic: () => reimprimirTicket(activo.idTicket) } : null);
+            salirDeEdicion();
             cargarVehiculos();
         });
 });

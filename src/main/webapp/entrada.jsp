@@ -70,12 +70,16 @@ document.getElementById('formEntrada').addEventListener('submit', function (e) {
         .then(r => {
             const div = document.getElementById('resultado');
             if (r.error) {
-                div.innerHTML = '<p class="error">' + escaparHtml(r.error) + '</p>';
+                div.innerHTML = '';
+                mostrarAviso(r.error, 'error');
+                return;
             } else if (r.asignado) {
                 div.innerHTML = '<p class="exito">' + escaparHtml(r.mensaje) + '</p>' + htmlTicket(r.ticket) +
                     '<button type="button" class="boton" onclick="window.print()">Imprimir ticket</button>';
+                mostrarAviso('Entrada registrada: ticket N.° ' + r.idTicket + ', espacio ' + r.numeroEspacio + '.');
             } else {
                 div.innerHTML = '<p class="aviso">' + escaparHtml(r.mensaje) + '</p>';
+                mostrarAviso(r.mensaje, 'error');
             }
             e.target.reset();
             avisoPlaca.textContent = '';

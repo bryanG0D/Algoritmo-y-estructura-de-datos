@@ -77,11 +77,12 @@ formCobro.addEventListener('submit', function (e) {
     fetch('salida', { method: 'POST', body: new URLSearchParams(new FormData(formCobro)) })
         .then(r => r.json())
         .then(r => {
-            if (r.error) { resultado.innerHTML = '<p class="error">' + escaparHtml(r.error) + '</p>'; return; }
+            if (r.error) { mostrarAviso(r.error, 'error'); return; }
             formCobro.hidden = true;
             campoConsulta.value = '';
             resultado.innerHTML = '<p class="exito">Cobrado ' + soles(r.monto) + '. Espacio ' +
                 escaparHtml(r.numeroEspacioLiberado || '') + ' liberado.</p>';
+            mostrarAviso('Salida registrada: cobrado ' + soles(r.monto) + ', espacio ' + (r.numeroEspacioLiberado || '') + ' liberado.');
         });
 });
 

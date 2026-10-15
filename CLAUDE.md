@@ -139,7 +139,10 @@ docs/         entregables/diagrama-clases.drawio (UML, 5 paginas; copia en Lucid
   tarjetas, barras por dia, por tipo (`sp_reporte_por_tipo`) y por metodo de pago
   (`sp_reporte_por_metodo_pago`). Vehiculos y Reportes tienen "Exportar a Excel"
   (`ExportarServlet`, `/exportar`, Apache POI): exporta lo filtrado en pantalla y
-  el reporte en 4 hojas. Las JSP cargan `style.css`/`main.js` con `?v=<fecha del
+  el reporte en 4 hojas. Los mensajes de cada accion salen como avisos flotantes
+  (`mostrarAviso` en main.js); Vehiculos tiene modo edicion visible y "Reimprimir
+  ticket" (`reimprimirTicket`, tambien en la ficha del inicio) para corregir la
+  placa y volver a imprimir. Las JSP cargan `style.css`/`main.js` con `?v=<fecha del
   archivo>` para que el navegador no use una copia vieja. El recorrido del AVL
   (`ArbolAVL.buscarConRecorrido`) va en un "Detalle tecnico" plegado que se
   QUITA en el `.rar` final. No mostrar terminos como AVL/Matriz al usuario.

@@ -85,7 +85,8 @@ function fichaVehiculo(r) {
         html += '<p class="exito">Estacionado en el espacio ' + escaparHtml(r.numeroEspacio || '') +
             ' desde ' + e.cuando + ' (hace ' + e.hace + ').</p>' +
             '<p>Ticket N.&deg; ' + r.ticketActivo.idTicket + '</p>' +
-            '<a class="boton" href="salida.jsp?ticket=' + r.ticketActivo.idTicket + '">Registrar salida</a>';
+            '<a class="boton" href="salida.jsp?ticket=' + r.ticketActivo.idTicket + '">Registrar salida</a> ' +
+            '<button type="button" class="boton-secundario" onclick="reimprimirTicket(' + r.ticketActivo.idTicket + ')">Reimprimir ticket</button>';
     } else {
         html += '<p class="aviso">No se encuentra en el estacionamiento.</p>';
     }
@@ -103,4 +104,57 @@ function detalleTecnico(r) {
         '<p class="recorrido-avl">' + (pasos || 'Arbol vacio') + '</p>' +
         '<p class="nota">Recorriendo una lista de inicio a fin podrian ser hasta ' +
         r.totalPlacas + ' comparaciones.</p></details>';
+}
+
+// Aviso flotante (esquina inferior derecha): se ve aunque la pagina este desplazada.
+// tipo: 'exito' | 'error' | 'info'. accion opcional: { texto, alHacerClic }.
+function mostrarAviso(mensaje, tipo = 'exito', accion = null) {
+    let contenedor = document.getElementById('avisos');
+    if (!contenedor) {
+        contenedor = document.createElement('div');
+        contenedor.id = 'avisos';
+        document.body.appendChild(contenedor);
+    }
+    const aviso = document.createElement('div');
+    aviso.className = 'aviso-flotante ' + tipo;
+    aviso.innerHTML = '<span class="aviso-texto">' + escaparHtml(mensaje) + '</span>';
+    if (accion) {
+        const boton = document.createElement('button');
+        boton.type = 'button';
+        boton.className = 'aviso-accion';
+        boton.textContent = accion.texto;
+        boton.onclick = () => { aviso.remove(); accion.alHacerClic(); };
+        aviso.appendChild(boton);
+    }
+    const cerrar = document.createElement('button');
+    cerrar.type = 'button';
+    cerrar.className = 'aviso-cerrar';
+    cerrar.setAttribute('aria-label', 'Cerrar');
+    cerrar.innerHTML = '&times;';
+    cerrar.onclick = () => aviso.remove();
+    aviso.appendChild(cerrar);
+    contenedor.appendChild(aviso);
+    setTimeout(() => aviso.remove(), accion ? 10000 : 5000);
+}
+
+// Ventana con el ticket (lee los datos actuales: si se corrigio la placa, sale corregida).
+function reimprimirTicket(idTicket) {
+    fetch('salida?consulta=' + idTicket)
+        .then(r => r.json())
+        .then(r => {
+            if (r.error || !r.encontrado) {
+                mostrarAviso(r.error || 'Ese ticket ya no esta activo.', 'error');
+                return;
+            }
+            const fondo = document.createElement('div');
+            fondo.className = 'modal-fondo';
+            fondo.innerHTML = '<div class="modal">' + htmlTicket(r.ticket) +
+                '<div class="modal-botones"><button type="button" class="boton" id="modalImprimir">Imprimir</button>' +
+                '<button type="button" class="boton-secundario" id="modalCerrar">Cerrar</button></div></div>';
+            document.body.appendChild(fondo);
+            const cerrar = () => fondo.remove();
+            fondo.querySelector('#modalImprimir').onclick = () => window.print();
+            fondo.querySelector('#modalCerrar').onclick = cerrar;
+            fondo.addEventListener('click', e => { if (e.target === fondo) cerrar(); });
+        });
 }
