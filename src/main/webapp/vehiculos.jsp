@@ -50,7 +50,7 @@
 cargarTiposVehiculo('idTipo');
 normalizarPlaca(document.getElementById('placa'));
 
-let vehiculos = [], activos = {};
+let vehiculos = [], activos = {}, vehiculoEditando = null;
 
 function cargarVehiculos() {
     fetch('vehiculos')
@@ -91,13 +91,6 @@ function mostrarTabla() {
         btnEditar.textContent = 'Editar';
         btnEditar.onclick = () => cargarEnFormulario(v);
         fila.lastElementChild.appendChild(btnEditar);
-        if (activos[v.idVehiculo]) {
-            const btnTicket = document.createElement('button');
-            btnTicket.type = 'button';
-            btnTicket.textContent = 'Reimprimir ticket';
-            btnTicket.onclick = () => reimprimirTicket(activos[v.idVehiculo].idTicket);
-            fila.lastElementChild.appendChild(btnTicket);
-        }
         tbody.appendChild(fila);
     });
     if (visibles.length === 0) {
@@ -122,6 +115,7 @@ function estadoVehiculo(activo) {
 }
 
 function cargarEnFormulario(v) {
+    vehiculoEditando = v;
     document.getElementById('idVehiculo').value = v.idVehiculo;
     document.getElementById('placa').value = v.placa;
     document.getElementById('marca').value = v.marca || '';
@@ -142,6 +136,7 @@ function salirDeEdicion() {
     const form = document.getElementById('formVehiculo');
     form.reset();
     form.classList.remove('editando');
+    vehiculoEditando = null;
     document.getElementById('idVehiculo').value = '';
     document.getElementById('botonGuardar').textContent = 'Agregar';
     document.getElementById('botonCancelar').hidden = true;
@@ -161,7 +156,10 @@ document.getElementById('formVehiculo').addEventListener('submit', function (e) 
         .then(r => {
             if (!r.exito) { mostrarAviso(r.mensaje, 'error'); return; }
             // Si el vehiculo esta dentro, se ofrece reimprimir su ticket con los datos corregidos.
-            const activo = idVehiculo && activos[idVehiculo];
+            const original = vehiculoEditando;
+            const cambio = original && (original.placa !== datos.get('placa').toUpperCase() ||
+                (original.marca || '') !== datos.get('marca').trim() || String(original.idTipo) !== datos.get('idTipo'));
+            const activo = cambio && activos[idVehiculo];
             mostrarAviso(r.mensaje + ' (' + datos.get('placa').toUpperCase() + ')', 'exito',
                 activo ? { texto: 'Reimprimir ticket', alHacerClic: () => reimprimirTicket(activo.idTicket) } : null);
             salirDeEdicion();

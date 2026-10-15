@@ -85,8 +85,7 @@ function fichaVehiculo(r) {
         html += '<p class="exito">Estacionado en el espacio ' + escaparHtml(r.numeroEspacio || '') +
             ' desde ' + e.cuando + ' (hace ' + e.hace + ').</p>' +
             '<p>Ticket N.&deg; ' + r.ticketActivo.idTicket + '</p>' +
-            '<a class="boton" href="salida.jsp?ticket=' + r.ticketActivo.idTicket + '">Registrar salida</a> ' +
-            '<button type="button" class="boton-secundario" onclick="reimprimirTicket(' + r.ticketActivo.idTicket + ')">Reimprimir ticket</button>';
+            '<a class="boton" href="salida.jsp?ticket=' + r.ticketActivo.idTicket + '">Registrar salida</a>';
     } else {
         html += '<p class="aviso">No se encuentra en el estacionamiento.</p>';
     }
@@ -134,7 +133,7 @@ function mostrarAviso(mensaje, tipo = 'exito', accion = null) {
     cerrar.onclick = () => aviso.remove();
     aviso.appendChild(cerrar);
     contenedor.appendChild(aviso);
-    setTimeout(() => aviso.remove(), accion ? 10000 : 5000);
+    if (!accion) setTimeout(() => aviso.remove(), 5000); // con boton: queda hasta que se use o se cierre
 }
 
 // Ventana con el ticket (lee los datos actuales: si se corrigio la placa, sale corregida).
