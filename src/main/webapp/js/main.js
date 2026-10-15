@@ -1,8 +1,3 @@
-// Funciones auxiliares compartidas por todas las paginas JSP.
-
-// Si la sesion vence (30 min sin uso), FiltroSesion responde 401 a los
-// Servlets. Envolvemos fetch una sola vez para que cualquier pagina vuelva
-// al login en ese caso, en lugar de mostrar un error.
 const fetchOriginal = window.fetch;
 window.fetch = function (...args) {
     return fetchOriginal.apply(this, args).then(r => {
@@ -59,7 +54,6 @@ function soles(monto) {
     return 'S/ ' + Number(monto).toFixed(2);
 }
 
-// Ticket que se entrega al conductor (se imprime solo este bloque, ver @media print en style.css).
 function htmlTicket(t) {
     return '<div class="ticket" id="ticketImprimible">' +
         '<div class="ticket-titulo">ESTACIONAMIENTO</div>' +
@@ -75,12 +69,10 @@ function htmlTicket(t) {
         '</div>';
 }
 
-// Escribe la placa siempre en mayusculas y sin espacios (evita duplicados como abc-123 / ABC-123).
 function normalizarPlaca(input) {
     input.addEventListener('input', () => { input.value = input.value.toUpperCase().replace(/\s/g, ''); });
 }
 
-// Ficha del vehiculo para la respuesta de /buscar (usada en inicio y en busqueda).
 function fichaVehiculo(r) {
     if (r.error) return '<p class="error">' + escaparHtml(r.error) + '</p>';
     if (!r.encontrado) return '<p class="aviso">' + escaparHtml(r.mensaje) + '</p>';
@@ -100,7 +92,6 @@ function fichaVehiculo(r) {
     return html + '</div>';
 }
 
-// Detalle tecnico plegado: como se encontro la placa en el Arbol AVL (para la exposicion).
 function detalleTecnico(r) {
     if (r.comparaciones === undefined) return '';
     const ultimo = r.recorrido.length - 1;

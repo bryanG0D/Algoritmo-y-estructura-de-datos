@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Inicio - Estacionamiento</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<%= new java.io.File(application.getRealPath("/css/style.css")).lastModified() %>">
 </head>
 <body>
 <% String paginaActual = "inicio"; %>
@@ -42,7 +42,7 @@
     </section>
 </main>
 
-<script src="js/main.js"></script>
+<script src="js/main.js?v=<%= new java.io.File(application.getRealPath("/js/main.js")).lastModified() %>"></script>
 <script>
 function cargarResumen() {
     fetch('resumen')
@@ -57,7 +57,6 @@ function cargarResumen() {
         });
 }
 
-// Busqueda rapida: usa el mismo /buscar (Arbol AVL) y muestra la ficha del vehiculo.
 document.getElementById('formBusquedaRapida').addEventListener('submit', function (e) {
     e.preventDefault();
     const placa = document.getElementById('placaRapida').value.trim();

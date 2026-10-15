@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Registrar entrada</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<%= new java.io.File(application.getRealPath("/css/style.css")).lastModified() %>">
 </head>
 <body>
 <% String paginaActual = "entrada"; %>
@@ -23,7 +23,7 @@
     </form>
     <div id="resultado"></div>
 </main>
-<script src="js/main.js"></script>
+<script src="js/main.js?v=<%= new java.io.File(application.getRealPath("/js/main.js")).lastModified() %>"></script>
 <script>
 cargarTiposVehiculo('idTipo');
 
@@ -33,7 +33,6 @@ const botonRegistrar = document.getElementById('botonRegistrar');
 let datosAutocompletados = false;
 normalizarPlaca(campoPlaca);
 
-// Al salir del campo placa: si el vehiculo ya vino antes, se rellenan sus datos.
 campoPlaca.addEventListener('change', function () {
     const placa = campoPlaca.value.trim();
     avisoPlaca.textContent = '';
