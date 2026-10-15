@@ -16,7 +16,7 @@ estructuras de datos en memoria: **Arbol AVL** (busqueda de placas) y
 
 1. Ejecuta el script `database/estacionamiento_inteligente.sql` en tu MySQL
    (Workbench, phpMyAdmin o consola). Crea la base de datos, las 6 tablas,
-   los datos iniciales y los 4 procedimientos almacenados.
+   los datos iniciales y los 6 procedimientos almacenados.
 2. Configura tus credenciales **sin tocar el codigo**:
    - Ve a `src/main/resources/`
    - Copia `db.properties.example` y nombra la copia `db.properties`
@@ -123,8 +123,8 @@ usaria un algoritmo como BCrypt.
 | Registrar salida | Cobra segun la tarifa del tipo de vehiculo (Auto / Camioneta S/ 4, Moto S/ 2, Bicicleta S/ 1 por hora) y libera el espacio |
 | Inicio | Resumen de ocupacion (Matriz), cobrado hoy y busqueda rapida por placa: consulta el **Arbol AVL en memoria** (O(log n)) y muestra donde esta el vehiculo, con boton para registrar su salida (cliente que perdio el ticket) |
 | Mapa del estacionamiento | Dibuja la **Matriz 2D** (5x10) con el estado real de cada espacio |
-| Vehiculos | CRUD completo (Crear, Leer, Actualizar, Eliminar) usando el patron DAO. Cada cambio pasa por `EstacionamientoService`, que tambien actualiza el **Arbol AVL** (inserta, cambia la placa o la elimina), asi la busqueda coincide siempre con la base. Solo placa y tipo son obligatorios; la marca es opcional (modelo y color se quitaron por no ser necesarios) |
-| Reporte de ingresos | Llama al procedimiento almacenado parametrizado por rango de fechas |
+| Vehiculos | Registro de vehiculos (crear, listar y editar) con el patron DAO. No se eliminan: los tickets y pagos dependen de ellos. Filtros Todos / Dentro / Fuera y busqueda por placa o marca. Cada cambio pasa por `EstacionamientoService`, que tambien actualiza el **Arbol AVL** (inserta o, si cambia la placa, quita la clave vieja), asi la busqueda coincide siempre con la base. Solo placa y tipo son obligatorios; la marca es opcional (modelo y color se quitaron por no ser necesarios) |
+| Reportes | Panel con rangos rapidos (hoy, 7 dias, mes, personalizado): total recaudado, tickets, ticket promedio, mejor dia, grafico por dia y desglose por tipo de vehiculo y por metodo de pago (3 procedimientos almacenados) |
 
 ## 7. Estructura del proyecto
 

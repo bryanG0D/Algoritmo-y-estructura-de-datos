@@ -23,6 +23,13 @@
     </form>
     <div id="mensaje"></div>
 
+    <div class="filtros">
+        <button type="button" class="filtro activo" data-estado="todos">Todos (<span id="cuentaTodos">0</span>)</button>
+        <button type="button" class="filtro" data-estado="dentro">Dentro (<span id="cuentaDentro">0</span>)</button>
+        <button type="button" class="filtro" data-estado="fuera">Fuera (<span id="cuentaFuera">0</span>)</button>
+        <input type="text" id="buscar" placeholder="Buscar por placa o marca" autocomplete="off">
+    </div>
+
     <table id="tablaVehiculos">
         <thead>
         <tr><th>Placa</th><th>Marca</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr>
@@ -35,36 +42,59 @@
 cargarTiposVehiculo('idTipo');
 normalizarPlaca(document.getElementById('placa'));
 
+let vehiculos = [], activos = {}, filtroEstado = 'todos';
+
 function cargarVehiculos() {
     fetch('vehiculos')
         .then(r => r.json())
         .then(r => {
-            const tbody = document.querySelector('#tablaVehiculos tbody');
-            tbody.innerHTML = '';
-            const activos = r.activos || {};
-            (r.vehiculos || []).forEach(v => {
-                const fila = document.createElement('tr');
-                fila.innerHTML = [v.placa, v.marca, v.nombreTipo]
-                    .map(dato => '<td>' + (dato ? escaparHtml(dato) : '-') + '</td>').join('') +
-                    '<td>' + estadoVehiculo(activos[v.idVehiculo]) + '</td><td></td>';
-                const celdaAcciones = fila.lastElementChild;
-
-                const btnEditar = document.createElement('button');
-                btnEditar.type = 'button';
-                btnEditar.textContent = 'Editar';
-                btnEditar.onclick = () => cargarEnFormulario(v);
-                celdaAcciones.appendChild(btnEditar);
-
-                const btnEliminar = document.createElement('button');
-                btnEliminar.type = 'button';
-                btnEliminar.textContent = 'Eliminar';
-                btnEliminar.onclick = () => eliminarVehiculo(v.idVehiculo, v.placa);
-                celdaAcciones.appendChild(btnEliminar);
-
-                tbody.appendChild(fila);
-            });
+            vehiculos = r.vehiculos || [];
+            activos = r.activos || {};
+            mostrarTabla();
         });
 }
+
+// Filtra por estado (todos / dentro / fuera) y por el texto buscado en placa o marca.
+function mostrarTabla() {
+    const texto = document.getElementById('buscar').value.trim().toUpperCase();
+    const dentro = vehiculos.filter(v => activos[v.idVehiculo]).length;
+    document.getElementById('cuentaTodos').textContent = vehiculos.length;
+    document.getElementById('cuentaDentro').textContent = dentro;
+    document.getElementById('cuentaFuera').textContent = vehiculos.length - dentro;
+
+    const visibles = vehiculos.filter(v => {
+        const estaDentro = !!activos[v.idVehiculo];
+        if (filtroEstado === 'dentro' && !estaDentro) return false;
+        if (filtroEstado === 'fuera' && estaDentro) return false;
+        return !texto || v.placa.includes(texto) || (v.marca || '').toUpperCase().includes(texto);
+    });
+
+    const tbody = document.querySelector('#tablaVehiculos tbody');
+    tbody.innerHTML = '';
+    visibles.forEach(v => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = [v.placa, v.marca, v.nombreTipo]
+            .map(dato => '<td>' + (dato ? escaparHtml(dato) : '-') + '</td>').join('') +
+            '<td>' + estadoVehiculo(activos[v.idVehiculo]) + '</td><td></td>';
+        const btnEditar = document.createElement('button');
+        btnEditar.type = 'button';
+        btnEditar.textContent = 'Editar';
+        btnEditar.onclick = () => cargarEnFormulario(v);
+        fila.lastElementChild.appendChild(btnEditar);
+        tbody.appendChild(fila);
+    });
+    if (visibles.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="sin-resultados">No hay vehiculos que coincidan.</td></tr>';
+    }
+}
+
+document.querySelectorAll('.filtro').forEach(boton => boton.addEventListener('click', () => {
+    document.querySelectorAll('.filtro').forEach(b => b.classList.remove('activo'));
+    boton.classList.add('activo');
+    filtroEstado = boton.dataset.estado;
+    mostrarTabla();
+}));
+document.getElementById('buscar').addEventListener('input', mostrarTabla);
 
 // Dentro: muestra su ticket activo (enlace a la salida) para validarlo con el que tiene el cliente.
 function estadoVehiculo(activo) {
@@ -79,16 +109,7 @@ function cargarEnFormulario(v) {
     document.getElementById('marca').value = v.marca || '';
     document.getElementById('idTipo').value = v.idTipo;
     document.getElementById('botonGuardar').textContent = 'Actualizar';
-}
-
-function eliminarVehiculo(id, placa) {
-    if (!confirm('Eliminar el vehiculo ' + placa + '?')) return;
-    const datos = new URLSearchParams();
-    datos.append('accion', 'eliminar');
-    datos.append('idVehiculo', id);
-    fetch('vehiculos', { method: 'POST', body: datos })
-        .then(r => r.json())
-        .then(r => { mostrarMensaje(r); cargarVehiculos(); });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function mostrarMensaje(r) {

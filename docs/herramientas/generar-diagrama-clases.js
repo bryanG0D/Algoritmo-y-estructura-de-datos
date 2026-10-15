@@ -159,7 +159,7 @@ for (const n of Object.keys(clases).filter(n => n.includes('.')))
 const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const xmlEsc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-const COLAPSAR = c => c.paquete === 'modelo' || ['ReporteIngresoDia', 'ResultadoEntrada', 'ResultadoSalida', 'ResultadoBusquedaAVL'].includes(c.nombre);
+const COLAPSAR = c => c.paquete === 'modelo' || ['ReporteIngresoDia', 'ReporteGrupo', 'ResultadoEntrada', 'ResultadoSalida', 'ResultadoBusquedaAVL'].includes(c.nombre);
 
 function lineasAtributos(c) {
     return c.atributos.map(a => {
@@ -246,17 +246,17 @@ const PAGINAS = [
         nombre: '3. Patron DAO',
         titulo: 'Capa de acceso a datos - Patron DAO',
         sub: 'Cada entidad tiene una interfaz DAO y su implementacion JDBC. TicketDAOImpl y PagoDAOImpl llaman a los procedimientos almacenados.',
-        nota: 'Las interfaces TicketDAO y PagoDAO tambien devuelven ResultadoEntrada, ResultadoSalida y ReporteIngresoDia.',
+        nota: 'Las interfaces TicketDAO y PagoDAO tambien devuelven ResultadoEntrada, ResultadoSalida, ReporteIngresoDia y ReporteGrupo.',
         celdas: [
             [0, 0, 'VehiculoDAO'], [0, 1, 'TipoVehiculoDAO'], [0, 2, 'UsuarioDAO'], [0, 3, 'EspacioEstacionamientoDAO'], [0, 4, 'TicketDAO'], [0, 5, 'PagoDAO'],
             [1, 0, 'VehiculoDAOImpl'], [1, 1, 'TipoVehiculoDAOImpl'], [1, 2, 'UsuarioDAOImpl'], [1, 3, 'EspacioEstacionamientoDAOImpl'], [1, 4, 'TicketDAOImpl'], [1, 5, 'PagoDAOImpl'],
-            [2, 1, 'ConexionBD'], [2, 3, 'ResultadoEntrada'], [2, 4, 'ResultadoSalida'], [2, 5, 'ReporteIngresoDia'],
+            [2, 1, 'ConexionBD'], [2, 3, 'ResultadoEntrada'], [2, 4, 'ResultadoSalida'], [2, 5, 'ReporteIngresoDia'], [2, 6, 'ReporteGrupo'],
         ],
         relaciones: [
             ...['Vehiculo', 'TipoVehiculo', 'Usuario', 'EspacioEstacionamiento', 'Ticket', 'Pago'].flatMap(e => [
                 [e + 'DAOImpl', e + 'DAO', 'realizacion'], [e + 'DAOImpl', 'ConexionBD', 'dependencia']]),
             ['TicketDAOImpl', 'ResultadoEntrada', 'dependencia'], ['TicketDAOImpl', 'ResultadoSalida', 'dependencia'],
-            ['PagoDAOImpl', 'ReporteIngresoDia', 'dependencia'],
+            ['PagoDAOImpl', 'ReporteIngresoDia', 'dependencia'], ['PagoDAOImpl', 'ReporteGrupo', 'dependencia'],
         ],
     },
     {

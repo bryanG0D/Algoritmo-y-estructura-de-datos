@@ -155,14 +155,6 @@ public class EstacionamientoService {
         arbolPlacas.insertar(v);
     }
 
-    public synchronized void eliminarVehiculo(int idVehiculo) throws SQLException {
-        Vehiculo v = vehiculoDAO.buscarPorId(idVehiculo);
-        vehiculoDAO.eliminar(idVehiculo);
-        if (v != null) {
-            arbolPlacas.eliminar(v.getPlaca());
-        }
-    }
-
     public Vehiculo buscarVehiculoEnMemoria(String placa) {
         return arbolPlacas.buscarPorPlaca(placa);
     }

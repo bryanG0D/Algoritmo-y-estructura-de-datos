@@ -77,7 +77,10 @@ Ya esta hecho y probado contra una base real. NO lo vuelvas a implementar:
   una vez.
 - Si no hay espacio: "Estacionamiento lleno..." y no se crea ticket.
 - Un solo script: `database/estacionamiento_inteligente.sql` crea la base
-  completa (6 tablas, 3 tipos, 4 procedimientos). Los scripts de migracion se
+  completa (6 tablas, 3 tipos, 6 procedimientos).
+  Los datos de ejemplo usan fechas relativas (NOW()/CURDATE()): tickets
+  historicos en los ultimos ~15 dias y 5 activos de hoy. Recargar la base el dia
+  de una demo para que los montos no crezcan. Los scripts de migracion se
   eliminaron porque nadie del grupo tiene una base anterior.
 
 ### Primera tarea en la PC del equipo: verificar
@@ -111,7 +114,7 @@ estructuras/  ArbolAVL, NodoAVL, ResultadoBusquedaAVL, MatrizEstacionamiento (si
 conexion/     ConexionBD (lee db.properties)
 dao/          Interfaz + Impl por entidad; TicketDAOImpl y PagoDAOImpl llaman a los procedimientos
 servicio/     EstacionamientoService (integra AVL + Matriz + DAO), CompatibilidadEspacio
-servlet/      Login, Logout, Entrada, Salida, Busqueda, Mapa, Vehiculo (CRUD), TipoVehiculo, Reporte, Resumen
+servlet/      Login, Logout, Entrada, Salida, Busqueda, Mapa, Vehiculo (crear/editar, sin eliminar), TipoVehiculo, Reporte, Resumen
 util/         AppContextListener (inicializa el servicio), FiltroSesion, GsonProvider
 webapp/       JSP, css, js. Servlets y filtro registrados en WEB-INF/web.xml (sin anotaciones)
 database/     estacionamiento_inteligente.sql (unico script: crea todo)
@@ -130,7 +133,11 @@ docs/         entregables/diagrama-clases.drawio (UML, 5 paginas; copia en Lucid
   (`htmlTicket` en main.js, `@media print`); Salida acepta N.° de ticket o placa
   (`GET /salida?consulta=`, `EstacionamientoService.consultarTicketActivo`) y
   muestra el monto antes de cobrar (misma regla que `sp_registrar_salida`).
-  Vehiculos muestra columna Estado con el ticket activo. El recorrido del AVL
+  Vehiculos muestra columna Estado con el ticket activo y filtros Todos/Dentro/
+  Fuera + busqueda (en el navegador). **No se eliminan vehiculos** (pedido del
+  docente: el historial depende de ellos). Reportes es un panel: rangos rapidos,
+  tarjetas, barras por dia, por tipo (`sp_reporte_por_tipo`) y por metodo de pago
+  (`sp_reporte_por_metodo_pago`). El recorrido del AVL
   (`ArbolAVL.buscarConRecorrido`) va en un "Detalle tecnico" plegado que se
   QUITA en el `.rar` final. No mostrar terminos como AVL/Matriz al usuario.
 - **UML:** `docs/entregables/diagrama-clases.drawio` se genera leyendo el

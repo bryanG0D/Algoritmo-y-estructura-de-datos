@@ -128,3 +128,30 @@ button.boton { width: auto; border: none; cursor: pointer; font-size: 14px; }
     #ticketImprimible, #ticketImprimible * { visibility: visible; }
     #ticketImprimible { position: absolute; left: 0; top: 0; border: 1px dashed #000; }
 }
+
+/* Filtro de vehiculos */
+.filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 24px 0 12px; }
+.filtro { width: auto; margin: 0; padding: 6px 14px; border: 1px solid #cbd5e1; border-radius: 999px;
+    background: #fff; color: #334155; cursor: pointer; font-size: 14px; }
+.filtro.activo { background: #2563eb; border-color: #2563eb; color: #fff; }
+.filtros input { flex: 1; min-width: 200px; margin: 0; padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; }
+.sin-resultados { text-align: center; color: #64748b; }
+
+/* Panel de reportes */
+main.panel-reporte { max-width: 1100px; }
+.panel-reporte .filtros { margin-top: 0; }
+.panel-reporte > .caja { margin-top: 16px; }
+.panel-reporte .tarjetas { margin-top: 8px; }
+.rango-fechas[hidden] { display: none; }
+.rango-fechas { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 8px; }
+.rango-fechas label { margin: 0; font-weight: normal; }
+.rango-fechas input { width: auto; }
+.rango-fechas button { width: auto; margin: 0; padding: 8px 20px; }
+.grafico { display: flex; align-items: flex-end; gap: 6px; height: 220px; padding-top: 8px; overflow-x: auto; }
+.barra-col { flex: 1; min-width: 34px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+.barra { width: 70%; min-height: 2px; background: #2563eb; border-radius: 4px 4px 0 0; }
+.barra-col:hover .barra { background: #1e4fc4; }
+.barra-valor { font-size: 11px; color: #334155; margin-bottom: 2px; white-space: nowrap; }
+.barra-dia { font-size: 11px; color: #64748b; margin-top: 4px; }
+.porcentaje { display: inline-block; width: 60px; height: 8px; background: #e2e8f0; border-radius: 4px; margin-right: 6px; vertical-align: middle; overflow: hidden; }
+.porcentaje div { height: 100%; background: #16a34a; }

@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface PagoDAO {
     List<ReporteIngresoDia> reporteIngresosPorRango(LocalDate inicio, LocalDate fin) throws SQLException;
+    List<ReporteGrupo> reportePorTipo(LocalDate inicio, LocalDate fin) throws SQLException;
+    List<ReporteGrupo> reportePorMetodoPago(LocalDate inicio, LocalDate fin) throws SQLException;
 }

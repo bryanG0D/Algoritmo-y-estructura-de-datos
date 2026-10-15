@@ -18,14 +18,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * CRUD completo (Crear, Leer, Actualizar, Eliminar) con patron DAO.
+ * Registro de vehiculos (crear, listar y actualizar) con patron DAO.
+ * No se eliminan: el historial de tickets y pagos depende de cada vehiculo.
  * Los cambios pasan por EstacionamientoService para que el Arbol AVL
  * quede sincronizado con la base de datos.
  */
 public class VehiculoServlet extends HttpServlet {
 
     private static final int MYSQL_DUPLICADO = 1062;
-    private static final int MYSQL_REFERENCIADO = 1451;
 
     private final Gson gson = GsonProvider.gson();
 
@@ -76,13 +76,6 @@ public class VehiculoServlet extends HttpServlet {
                     respuesta.put("mensaje", "Vehiculo actualizado.");
                     break;
                 }
-                case "eliminar": {
-                    int id = Integer.parseInt(req.getParameter("idVehiculo"));
-                    servicio().eliminarVehiculo(id);
-                    respuesta.put("exito", true);
-                    respuesta.put("mensaje", "Vehiculo eliminado.");
-                    break;
-                }
                 default:
                     respuesta.put("exito", false);
                     respuesta.put("mensaje", "Accion no reconocida: " + accion);
@@ -91,8 +84,6 @@ public class VehiculoServlet extends HttpServlet {
             respuesta.put("exito", false);
             if (e.getErrorCode() == MYSQL_DUPLICADO) {
                 respuesta.put("mensaje", "Ya existe un vehiculo con esa placa.");
-            } else if (e.getErrorCode() == MYSQL_REFERENCIADO) {
-                respuesta.put("mensaje", "No se puede eliminar: el vehiculo tiene tickets registrados.");
             } else {
                 respuesta.put("mensaje", "Error de base de datos: " + e.getMessage());
             }
