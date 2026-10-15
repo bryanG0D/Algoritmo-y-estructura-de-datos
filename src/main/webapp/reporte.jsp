@@ -56,7 +56,7 @@
 </main>
 <script src="js/main.js?v=<%= new java.io.File(application.getRealPath("/js/main.js")).lastModified() %>"></script>
 <script>
-const NOMBRE_METODO = { EFECTIVO: 'Efectivo', TARJETA: 'Tarjeta', YAPE: 'Yape', PLIN: 'Plin' };
+const NOMBRE_METODO = { EFECTIVO: 'Efectivo', TARJETA: 'Tarjeta', 'BILLETERA DIGITAL': 'Billetera digital' };
 
 // Fecha local en formato AAAA-MM-DD (sin pasar por UTC, que cambiaria el dia de noche)
 function aIso(d) {

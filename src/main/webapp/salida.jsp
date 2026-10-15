@@ -23,8 +23,7 @@
         <select name="metodoPago" id="metodoPago" required>
             <option value="EFECTIVO">Efectivo</option>
             <option value="TARJETA">Tarjeta</option>
-            <option value="YAPE">Yape</option>
-            <option value="PLIN">Plin</option>
+            <option value="BILLETERA DIGITAL">Billetera digital (Yape, Plin, etc.)</option>
         </select>
         <input type="hidden" name="idTicket" id="idTicket">
         <button type="submit" id="botonCobrar">Cobrar y liberar espacio</button>
