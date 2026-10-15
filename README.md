@@ -1,4 +1,4 @@
-# Sistema de Estacionamiento Inteligente
+# Sistema de Estacionamiento
 
 Proyecto final del curso Algoritmos y Estructuras de Datos (UTP). Aplicacion
 web (Java Servlets + JSP + JavaScript) sobre MySQL, con patron DAO y tres
@@ -16,7 +16,7 @@ estructuras de datos en memoria: **Arbol AVL** (busqueda de placas) y
 
 1. Ejecuta el script `database/estacionamiento_inteligente.sql` en tu MySQL
    (Workbench, phpMyAdmin o consola). Crea la base de datos, las 6 tablas,
-   los datos iniciales y los 4 procedimientos almacenados.
+   los datos iniciales y los 6 procedimientos almacenados.
 2. Configura tus credenciales **sin tocar el codigo**:
    - Ve a `src/main/resources/`
    - Copia `db.properties.example` y nombra la copia `db.properties`
@@ -26,6 +26,19 @@ estructuras de datos en memoria: **Arbol AVL** (busqueda de placas) y
    no pisa la de tus companeros. Si no creas el archivo, el sistema
    usa `root` sin contrasena (lo tipico en XAMPP). En la consola veras cual
    de los dos casos se aplico al arrancar.
+
+### Base de datos compartida en la nube (Aiven)
+
+El grupo tiene la misma base creada en un MySQL en la nube (Aiven, plan
+gratuito), asi todos ven los mismos datos sin instalar MySQL:
+
+- En `db.properties` usa el bloque "Opcion nube" de `db.properties.example`.
+  El host, el puerto y la contrasena los da el encargado del grupo por
+  privado: **nunca** se escriben en el codigo ni se suben a GitHub.
+- Requiere internet. Si Aiven apaga el servicio por inactividad, se vuelve a
+  encender desde su consola (conviene revisarlo antes de la exposicion).
+- El mismo script `database/estacionamiento_inteligente.sql` crea la base en
+  la nube o en un MySQL local; no hay que cambiar nada del codigo.
 
 ## 3. Abrir el proyecto en Apache NetBeans
 
@@ -108,10 +121,10 @@ usaria un algoritmo como BCrypt.
 |---|---|
 | Registrar entrada | La **Matriz** elige el espacio: busca la fila con mas lugares libres del tipo adecuado (motos y bicicletas van a la columna 10; autos y camionetas a las columnas 1 a 9). Si no hay espacio, informa "estacionamiento lleno" y no crea ticket |
 | Registrar salida | Cobra segun la tarifa del tipo de vehiculo (Auto / Camioneta S/ 4, Moto S/ 2, Bicicleta S/ 1 por hora) y libera el espacio |
-| Buscar por placa | Consulta el **Arbol AVL en memoria** (O(log n)), no la base de datos directamente |
+| Inicio | Resumen de ocupacion (Matriz), cobrado hoy y busqueda rapida por placa: consulta el **Arbol AVL en memoria** (O(log n)) y muestra donde esta el vehiculo, con boton para registrar su salida (cliente que perdio el ticket) |
 | Mapa del estacionamiento | Dibuja la **Matriz 2D** (5x10) con el estado real de cada espacio |
-| Vehiculos | CRUD completo (Crear, Leer, Actualizar, Eliminar) usando el patron DAO |
-| Reporte de ingresos | Llama al procedimiento almacenado parametrizado por rango de fechas |
+| Vehiculos | Registro de vehiculos (crear, listar y editar) con el patron DAO. No se eliminan: los tickets y pagos dependen de ellos. Filtro Todos / Dentro / Fuera, busqueda por placa o marca y exportacion a Excel de lo filtrado. Cada cambio pasa por `EstacionamientoService`, que tambien actualiza el **Arbol AVL** (inserta o, si cambia la placa, quita la clave vieja), asi la busqueda coincide siempre con la base. Solo placa y tipo son obligatorios; la marca es opcional (modelo y color se quitaron por no ser necesarios) |
+| Reportes | Panel con rangos rapidos (hoy, 7 dias, mes, personalizado): total recaudado, tickets, ticket promedio, mejor dia, grafico por dia y desglose por tipo de vehiculo y por metodo de pago (3 procedimientos almacenados). Exporta el periodo a Excel (4 hojas, con Apache POI) |
 
 ## 7. Estructura del proyecto
 
@@ -122,14 +135,14 @@ database/         - estacionamiento_inteligente.sql (base completa desde cero)
 src/main/resources/db.properties.example - Plantilla de credenciales
 src/main/java/com/utp/estacionamiento/
   modelo/         - Clases POJO (Vehiculo, Ticket, Pago, etc.)
-  estructuras/    - ArbolAVL, MatrizEstacionamiento
+  estructuras/    - ArbolAVL, NodoAVL, ResultadoBusquedaAVL, MatrizEstacionamiento
   conexion/       - ConexionBD (punto unico de conexion JDBC)
   dao/            - Interfaces + implementaciones (patron DAO)
                     TicketDAOImpl invoca los procedimientos almacenados
   servicio/       - EstacionamientoService (integra AVL + Matriz + DAO)
                     CompatibilidadEspacio (regla moto/auto)
   servlet/        - Los Servlets (controladores web)
-  util/           - AppContextListener (carga todo al arrancar), GsonProvider
+  util/           - AppContextListener (carga todo al arrancar), FiltroSesion (exige login), GsonProvider
 src/main/webapp/  - Paginas JSP, CSS y JavaScript
 ```
 

@@ -30,6 +30,8 @@ public class ReporteServlet extends HttpServlet {
             LocalDate fin = LocalDate.parse(req.getParameter("fechaFin"));
             List<ReporteIngresoDia> datos = pagoDAO.reporteIngresosPorRango(inicio, fin);
             respuesta.put("datos", datos);
+            respuesta.put("porTipo", pagoDAO.reportePorTipo(inicio, fin));
+            respuesta.put("porMetodo", pagoDAO.reportePorMetodoPago(inicio, fin));
         } catch (SQLException e) {
             respuesta.put("error", "Error de base de datos: " + e.getMessage());
         } catch (Exception e) {

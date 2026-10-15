@@ -48,6 +48,28 @@ public class MatrizEstacionamiento {
         return libres;
     }
 
+    /** Cuenta los espacios libres de un tipo en toda la matriz. */
+    public int contarLibres(int idTipoPermitido) {
+        int libres = 0;
+        for (int f = 1; f <= filas; f++) {
+            libres += contarLibresEnFila(f, idTipoPermitido);
+        }
+        return libres;
+    }
+
+    /** Cuenta todos los espacios de un tipo (libres u ocupados). */
+    public int contarTotal(int idTipoPermitido) {
+        int total = 0;
+        for (EspacioEstacionamiento[] fila : matriz) {
+            for (EspacioEstacionamiento e : fila) {
+                if (e != null && e.getIdTipoPermitido() == idTipoPermitido) {
+                    total++;
+                }
+            }
+        }
+        return total;
+    }
+
     /**
      * Asignacion inteligente: busca la fila con MAS espacios libres del tipo
      * pedido (en empate, la de menor numero) y devuelve el primer espacio
