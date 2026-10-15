@@ -266,17 +266,17 @@ const PAGINAS = [
         nota: 'Todos los Servlets usan GsonProvider para responder JSON (no se dibuja). El detalle de los DAO esta en la pagina 3 y el de EstacionamientoService en la 5.',
         celdas: [
             [0, 4, 'HttpServlet', { nota: 'javax.servlet.http' }],
-            [1, 0, 'LoginServlet'], [1, 1, 'TipoVehiculoServlet'], [1, 2, 'ReporteServlet'], [1, 3, 'LogoutServlet'], [1, 4, 'VehiculoServlet'],
-            [1, 5, 'EntradaServlet'], [1, 6, 'SalidaServlet'], [1, 7, 'BusquedaServlet'], [1, 8, 'MapaServlet'], [1, 9, 'ResumenServlet'],
+            [1, 0, 'LoginServlet'], [1, 1, 'TipoVehiculoServlet'], [1, 2, 'ReporteServlet'], [1, 3, 'ExportarServlet'], [1, 4, 'VehiculoServlet'],
+            [1, 5, 'EntradaServlet'], [1, 6, 'SalidaServlet'], [1, 7, 'BusquedaServlet'], [1, 8, 'MapaServlet'], [1, 9, 'ResumenServlet'], [1, 10, 'LogoutServlet'],
             [2, 0, 'UsuarioDAO', COMPACTA], [2, 1, 'TipoVehiculoDAO', COMPACTA], [2, 2, 'PagoDAO', COMPACTA],
             [2, 7, 'EstacionamientoService', COMPACTA],
         ],
         relaciones: [
-            ...['Login', 'TipoVehiculo', 'Vehiculo', 'Reporte', 'Logout', 'Entrada', 'Salida', 'Busqueda', 'Mapa', 'Resumen']
+            ...['Login', 'TipoVehiculo', 'Vehiculo', 'Reporte', 'Exportar', 'Logout', 'Entrada', 'Salida', 'Busqueda', 'Mapa', 'Resumen']
                 .map(s => [s + 'Servlet', 'HttpServlet', 'herencia']),
             ['LoginServlet', 'UsuarioDAO', 'asociacion'], ['TipoVehiculoServlet', 'TipoVehiculoDAO', 'asociacion'],
-            ['ReporteServlet', 'PagoDAO', 'asociacion'],
-            ...['Vehiculo', 'Entrada', 'Salida', 'Busqueda', 'Mapa', 'Resumen'].map(s => [s + 'Servlet', 'EstacionamientoService', 'dependencia']),
+            ['ReporteServlet', 'PagoDAO', 'asociacion'], ['ExportarServlet', 'PagoDAO', 'asociacion'],
+            ...['Exportar', 'Vehiculo', 'Entrada', 'Salida', 'Busqueda', 'Mapa', 'Resumen'].map(s => [s + 'Servlet', 'EstacionamientoService', 'dependencia']),
         ],
     },
     {

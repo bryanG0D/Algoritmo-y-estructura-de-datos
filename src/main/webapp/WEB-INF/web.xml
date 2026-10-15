@@ -111,6 +111,15 @@
         <url-pattern>/resumen</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>ExportarServlet</servlet-name>
+        <servlet-class>com.utp.estacionamiento.servlet.ExportarServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ExportarServlet</servlet-name>
+        <url-pattern>/exportar</url-pattern>
+    </servlet-mapping>
+
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>
     </welcome-file-list>

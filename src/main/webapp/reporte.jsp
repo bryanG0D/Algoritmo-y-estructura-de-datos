@@ -18,6 +18,7 @@
         <button type="button" class="segmento" data-rango="mes">Este mes</button>
         <button type="button" class="segmento" data-rango="personalizado">Personalizado</button>
     </div>
+    <button type="button" id="botonExportar" class="boton-excel">Exportar a Excel</button>
     <form id="formRango" class="rango-fechas" hidden>
         <label>Desde <input type="date" id="fechaInicio" required></label>
         <label>Hasta <input type="date" id="fechaFin" required></label>
@@ -75,7 +76,10 @@ function rangoDe(tipo) {
     return [aIso(inicio), aIso(hoy)];
 }
 
+let periodoActual = null;
+
 function cargarReporte(inicio, fin) {
+    periodoActual = [inicio, fin];
     document.getElementById('periodo').textContent = 'Periodo: ' + diaCorto(inicio) + ' al ' + diaCorto(fin);
     fetch('reporte?fechaInicio=' + inicio + '&fechaFin=' + fin)
         .then(r => r.json())
@@ -147,6 +151,11 @@ document.querySelectorAll('.segmento').forEach(boton => boton.addEventListener('
     document.getElementById('formRango').hidden = !personalizado;
     if (!personalizado) cargarReporte(...rangoDe(boton.dataset.rango));
 }));
+
+// Descarga en Excel el periodo que se esta viendo (resumen, por dia, por tipo y por metodo de pago).
+document.getElementById('botonExportar').addEventListener('click', () => {
+    location.href = 'exportar?que=reporte&fechaInicio=' + periodoActual[0] + '&fechaFin=' + periodoActual[1];
+});
 
 document.getElementById('formRango').addEventListener('submit', function (e) {
     e.preventDefault();

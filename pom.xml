@@ -50,6 +50,13 @@
             <version>2.0.13</version>
         </dependency>
 
+        <!-- Exportar a Excel (.xlsx) la lista de vehiculos y los reportes -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+
         <!-- Serializacion JSON para las respuestas de los Servlets -->
         <dependency>
             <groupId>com.google.code.gson</groupId>

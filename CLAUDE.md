@@ -114,7 +114,7 @@ estructuras/  ArbolAVL, NodoAVL, ResultadoBusquedaAVL, MatrizEstacionamiento (si
 conexion/     ConexionBD (lee db.properties)
 dao/          Interfaz + Impl por entidad; TicketDAOImpl y PagoDAOImpl llaman a los procedimientos
 servicio/     EstacionamientoService (integra AVL + Matriz + DAO), CompatibilidadEspacio
-servlet/      Login, Logout, Entrada, Salida, Busqueda, Mapa, Vehiculo (crear/editar, sin eliminar), TipoVehiculo, Reporte, Resumen
+servlet/      Login, Logout, Entrada, Salida, Busqueda, Mapa, Vehiculo (crear/editar, sin eliminar), TipoVehiculo, Reporte, Resumen, Exportar
 util/         AppContextListener (inicializa el servicio), FiltroSesion, GsonProvider
 webapp/       JSP, css, js. Servlets y filtro registrados en WEB-INF/web.xml (sin anotaciones)
 database/     estacionamiento_inteligente.sql (unico script: crea todo)
@@ -137,7 +137,10 @@ docs/         entregables/diagrama-clases.drawio (UML, 5 paginas; copia en Lucid
   Fuera + busqueda (en el navegador). **No se eliminan vehiculos** (pedido del
   docente: el historial depende de ellos). Reportes es un panel: rangos rapidos,
   tarjetas, barras por dia, por tipo (`sp_reporte_por_tipo`) y por metodo de pago
-  (`sp_reporte_por_metodo_pago`). El recorrido del AVL
+  (`sp_reporte_por_metodo_pago`). Vehiculos y Reportes tienen "Exportar a Excel"
+  (`ExportarServlet`, `/exportar`, Apache POI): exporta lo filtrado en pantalla y
+  el reporte en 4 hojas. Las JSP cargan `style.css`/`main.js` con `?v=<fecha del
+  archivo>` para que el navegador no use una copia vieja. El recorrido del AVL
   (`ArbolAVL.buscarConRecorrido`) va en un "Detalle tecnico" plegado que se
   QUITA en el `.rar` final. No mostrar terminos como AVL/Matriz al usuario.
 - **UML:** `docs/entregables/diagrama-clases.drawio` se genera leyendo el

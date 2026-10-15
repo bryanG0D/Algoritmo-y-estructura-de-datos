@@ -34,6 +34,7 @@
         <label class="campo-filtro campo-buscar">Buscar
             <input type="text" id="buscar" placeholder="Placa o marca" autocomplete="off">
         </label>
+        <button type="button" id="botonExportar" class="boton-excel">Exportar a Excel</button>
     </div>
 
     <table id="tablaVehiculos">
@@ -98,6 +99,12 @@ function mostrarTabla() {
 
 document.getElementById('filtroEstado').addEventListener('change', mostrarTabla);
 document.getElementById('buscar').addEventListener('input', mostrarTabla);
+
+// Descarga en Excel exactamente lo que se ve con el filtro y la busqueda actuales.
+document.getElementById('botonExportar').addEventListener('click', () => {
+    location.href = 'exportar?que=vehiculos&estado=' + document.getElementById('filtroEstado').value +
+        '&buscar=' + encodeURIComponent(document.getElementById('buscar').value.trim());
+});
 
 // Dentro: muestra su ticket activo (enlace a la salida) para validarlo con el que tiene el cliente.
 function estadoVehiculo(activo) {
