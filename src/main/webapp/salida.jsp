@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Registrar salida</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<%= new java.io.File(application.getRealPath("/css/style.css")).lastModified() %>">
 </head>
 <body>
 <% String paginaActual = "salida"; %>
@@ -31,7 +31,7 @@
     </form>
     <div id="resultado"></div>
 </main>
-<script src="js/main.js"></script>
+<script src="js/main.js?v=<%= new java.io.File(application.getRealPath("/js/main.js")).lastModified() %>"></script>
 <script>
 const campoConsulta = document.getElementById('consulta');
 const formCobro = document.getElementById('formCobro');

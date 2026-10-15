@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Reportes</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<%= new java.io.File(application.getRealPath("/css/style.css")).lastModified() %>">
 </head>
 <body>
 <% String paginaActual = "reporte"; %>
@@ -12,11 +12,11 @@
 <main class="panel-reporte">
     <h2 class="titulo-pagina">Reporte de ingresos</h2>
 
-    <div class="filtros">
-        <button type="button" class="filtro" data-rango="hoy">Hoy</button>
-        <button type="button" class="filtro activo" data-rango="semana">Ultimos 7 dias</button>
-        <button type="button" class="filtro" data-rango="mes">Este mes</button>
-        <button type="button" class="filtro" data-rango="personalizado">Personalizado</button>
+    <div class="segmentado">
+        <button type="button" class="segmento" data-rango="hoy">Hoy</button>
+        <button type="button" class="segmento activo" data-rango="semana">Ultimos 7 dias</button>
+        <button type="button" class="segmento" data-rango="mes">Este mes</button>
+        <button type="button" class="segmento" data-rango="personalizado">Personalizado</button>
     </div>
     <form id="formRango" class="rango-fechas" hidden>
         <label>Desde <input type="date" id="fechaInicio" required></label>
@@ -53,7 +53,7 @@
         <table id="tablaDia"><thead><tr><th>Fecha</th><th>Tickets</th><th>Ingreso</th></tr></thead><tbody></tbody></table>
     </div>
 </main>
-<script src="js/main.js"></script>
+<script src="js/main.js?v=<%= new java.io.File(application.getRealPath("/js/main.js")).lastModified() %>"></script>
 <script>
 const NOMBRE_METODO = { EFECTIVO: 'Efectivo', TARJETA: 'Tarjeta', YAPE: 'Yape', PLIN: 'Plin' };
 
@@ -140,8 +140,8 @@ function mostrarDetalle(dias) {
     ).join('') : '<tr><td colspan="3" class="sin-resultados">Sin datos</td></tr>';
 }
 
-document.querySelectorAll('.filtro').forEach(boton => boton.addEventListener('click', () => {
-    document.querySelectorAll('.filtro').forEach(b => b.classList.remove('activo'));
+document.querySelectorAll('.segmento').forEach(boton => boton.addEventListener('click', () => {
+    document.querySelectorAll('.segmento').forEach(b => b.classList.remove('activo'));
     boton.classList.add('activo');
     const personalizado = boton.dataset.rango === 'personalizado';
     document.getElementById('formRango').hidden = !personalizado;

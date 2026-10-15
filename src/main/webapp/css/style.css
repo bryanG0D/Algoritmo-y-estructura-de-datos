@@ -129,17 +129,25 @@ button.boton { width: auto; border: none; cursor: pointer; font-size: 14px; }
     #ticketImprimible { position: absolute; left: 0; top: 0; border: 1px dashed #000; }
 }
 
-/* Filtro de vehiculos */
-.filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 24px 0 12px; }
-.filtro { width: auto; margin: 0; padding: 6px 14px; border: 1px solid #cbd5e1; border-radius: 999px;
-    background: #fff; color: #334155; cursor: pointer; font-size: 14px; }
-.filtro.activo { background: #2563eb; border-color: #2563eb; color: #fff; }
-.filtros input { flex: 1; min-width: 200px; margin: 0; padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; }
+/* Filtro de vehiculos: menu desplegable + buscador */
+.barra-filtros { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin: 24px 0 12px;
+    background: #fff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.campo-filtro { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: bold; color: #475569; }
+.campo-filtro select, .campo-filtro input { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px;
+    font-size: 14px; background: #fff; color: #1e293b; }
+.campo-filtro select { min-width: 250px; cursor: pointer; }
+.campo-buscar { flex: 1; min-width: 200px; }
+.campo-filtro select:focus, .campo-filtro input:focus { outline: 2px solid #93c5fd; border-color: #2563eb; }
 .sin-resultados { text-align: center; color: #64748b; }
 
 /* Panel de reportes */
 main.panel-reporte { max-width: 1100px; }
-.panel-reporte .filtros { margin-top: 0; }
+/* Selector segmentado de periodo (botones unidos) */
+.segmentado { display: inline-flex; background: #e2e8f0; border-radius: 8px; padding: 4px; gap: 2px; margin-bottom: 12px; }
+.segmento { width: auto; margin: 0; padding: 8px 16px; border: none; border-radius: 6px; background: transparent;
+    color: #475569; font-size: 14px; font-weight: 600; cursor: pointer; }
+.segmento:hover { color: #1e293b; }
+.segmento.activo { background: #fff; color: #2563eb; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
 .panel-reporte > .caja { margin-top: 16px; }
 .panel-reporte .tarjetas { margin-top: 8px; }
 .rango-fechas[hidden] { display: none; }

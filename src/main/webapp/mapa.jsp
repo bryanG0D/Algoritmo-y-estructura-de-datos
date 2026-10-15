@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Mapa del estacionamiento</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<%= new java.io.File(application.getRealPath("/css/style.css")).lastModified() %>">
 </head>
 <body>
 <% String paginaActual = "mapa"; %>
@@ -18,7 +18,7 @@
     </div>
     <div id="matriz"></div>
 </main>
-<script src="js/main.js"></script>
+<script src="js/main.js?v=<%= new java.io.File(application.getRealPath("/js/main.js")).lastModified() %>"></script>
 <script>
 function cargarMapa() {
     fetch('mapa')

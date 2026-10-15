@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Vehiculos</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<%= new java.io.File(application.getRealPath("/css/style.css")).lastModified() %>">
 </head>
 <body>
 <% String paginaActual = "vehiculos"; %>
@@ -23,11 +23,17 @@
     </form>
     <div id="mensaje"></div>
 
-    <div class="filtros">
-        <button type="button" class="filtro activo" data-estado="todos">Todos (<span id="cuentaTodos">0</span>)</button>
-        <button type="button" class="filtro" data-estado="dentro">Dentro (<span id="cuentaDentro">0</span>)</button>
-        <button type="button" class="filtro" data-estado="fuera">Fuera (<span id="cuentaFuera">0</span>)</button>
-        <input type="text" id="buscar" placeholder="Buscar por placa o marca" autocomplete="off">
+    <div class="barra-filtros">
+        <label class="campo-filtro">Mostrar
+            <select id="filtroEstado">
+                <option value="todos">Todos</option>
+                <option value="dentro">Dentro del estacionamiento</option>
+                <option value="fuera">Fuera</option>
+            </select>
+        </label>
+        <label class="campo-filtro campo-buscar">Buscar
+            <input type="text" id="buscar" placeholder="Placa o marca" autocomplete="off">
+        </label>
     </div>
 
     <table id="tablaVehiculos">
@@ -37,12 +43,12 @@
         <tbody></tbody>
     </table>
 </main>
-<script src="js/main.js"></script>
+<script src="js/main.js?v=<%= new java.io.File(application.getRealPath("/js/main.js")).lastModified() %>"></script>
 <script>
 cargarTiposVehiculo('idTipo');
 normalizarPlaca(document.getElementById('placa'));
 
-let vehiculos = [], activos = {}, filtroEstado = 'todos';
+let vehiculos = [], activos = {};
 
 function cargarVehiculos() {
     fetch('vehiculos')
@@ -57,10 +63,12 @@ function cargarVehiculos() {
 // Filtra por estado (todos / dentro / fuera) y por el texto buscado en placa o marca.
 function mostrarTabla() {
     const texto = document.getElementById('buscar').value.trim().toUpperCase();
+    const filtroEstado = document.getElementById('filtroEstado').value;
     const dentro = vehiculos.filter(v => activos[v.idVehiculo]).length;
-    document.getElementById('cuentaTodos').textContent = vehiculos.length;
-    document.getElementById('cuentaDentro').textContent = dentro;
-    document.getElementById('cuentaFuera').textContent = vehiculos.length - dentro;
+    const opciones = document.getElementById('filtroEstado').options;
+    opciones[0].textContent = 'Todos (' + vehiculos.length + ')';
+    opciones[1].textContent = 'Dentro del estacionamiento (' + dentro + ')';
+    opciones[2].textContent = 'Fuera (' + (vehiculos.length - dentro) + ')';
 
     const visibles = vehiculos.filter(v => {
         const estaDentro = !!activos[v.idVehiculo];
@@ -88,12 +96,7 @@ function mostrarTabla() {
     }
 }
 
-document.querySelectorAll('.filtro').forEach(boton => boton.addEventListener('click', () => {
-    document.querySelectorAll('.filtro').forEach(b => b.classList.remove('activo'));
-    boton.classList.add('activo');
-    filtroEstado = boton.dataset.estado;
-    mostrarTabla();
-}));
+document.getElementById('filtroEstado').addEventListener('change', mostrarTabla);
 document.getElementById('buscar').addEventListener('input', mostrarTabla);
 
 // Dentro: muestra su ticket activo (enlace a la salida) para validarlo con el que tiene el cliente.
