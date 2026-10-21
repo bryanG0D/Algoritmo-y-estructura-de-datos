@@ -126,6 +126,10 @@
 
     <session-config>
         <session-timeout>30</session-timeout>
+        <!-- La cookie de sesion no es accesible desde JavaScript -->
+        <cookie-config>
+            <http-only>true</http-only>
+        </cookie-config>
     </session-config>
 
     <!-- Errores: pagina generica, sin detalles tecnicos para el usuario (el detalle queda en el log del servidor) -->
