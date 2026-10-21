@@ -32,6 +32,8 @@ public class LoginServlet extends HttpServlet {
             Usuario usuario = usuarioDAO.buscarPorLogin(login);
             if (usuario != null && claveCorrecta(clave, usuario.getContrasenaHash())) {
                 HttpSession sesion = req.getSession(true);
+                // Nuevo id de sesion al autenticar: evita que alguien fije la sesion antes del login
+                req.changeSessionId();
                 sesion.setAttribute("usuario", usuario);
                 respuesta.put("exito", true);
                 respuesta.put("nombre", usuario.getNombre());
