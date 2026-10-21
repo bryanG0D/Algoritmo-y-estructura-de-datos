@@ -58,7 +58,7 @@
 <script>
 const NOMBRE_METODO = { EFECTIVO: 'Efectivo', TARJETA: 'Tarjeta', 'BILLETERA DIGITAL': 'Billetera digital' };
 
-// Fecha local en formato AAAA-MM-DD (sin pasar por UTC, que cambiaria el dia de noche)
+
 function aIso(d) {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
@@ -104,7 +104,7 @@ function mostrarResumen(dias) {
     document.getElementById('mejorDiaMonto').textContent = mejor ? 'Mejor dia (' + soles(mejor.ingresoTotal) + ')' : 'Mejor dia';
 }
 
-// Una barra por dia del periodo (los dias sin cobros aparecen en cero).
+
 function mostrarGrafico(dias, inicio, fin) {
     const porFecha = {};
     dias.forEach(d => porFecha[d.fecha] = Number(d.ingresoTotal));
@@ -152,7 +152,7 @@ document.querySelectorAll('.segmento').forEach(boton => boton.addEventListener('
     if (!personalizado) cargarReporte(...rangoDe(boton.dataset.rango));
 }));
 
-// Descarga en Excel el periodo que se esta viendo (resumen, por dia, por tipo y por metodo de pago).
+
 document.getElementById('botonExportar').addEventListener('click', () => {
     location.href = 'exportar?que=reporte&fechaInicio=' + periodoActual[0] + '&fechaFin=' + periodoActual[1];
 });

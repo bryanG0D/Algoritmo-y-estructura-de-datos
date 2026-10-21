@@ -107,7 +107,7 @@ document.getElementById('botonExportar').addEventListener('click', () => {
         '&buscar=' + encodeURIComponent(document.getElementById('buscar').value.trim());
 });
 
-// Dentro: muestra su ticket activo (enlace a la salida) para validarlo con el que tiene el cliente.
+
 function estadoVehiculo(activo) {
     if (!activo) return '<span class="estado-fuera">Fuera</span>';
     return '<a class="estado-dentro" href="salida.jsp?ticket=' + activo.idTicket + '">Dentro &middot; Ticket N.&deg; ' +
