@@ -41,8 +41,9 @@ public class LoginServlet extends HttpServlet {
                 respuesta.put("mensaje", "Usuario o contrasena incorrectos.");
             }
         } catch (SQLException e) {
+            log("Error de base de datos en el login", e);
             respuesta.put("exito", false);
-            respuesta.put("mensaje", "Error de base de datos: " + e.getMessage());
+            respuesta.put("mensaje", "No se pudo iniciar sesion. Intenta de nuevo en unos segundos.");
         }
 
         resp.setContentType("application/json;charset=UTF-8");
