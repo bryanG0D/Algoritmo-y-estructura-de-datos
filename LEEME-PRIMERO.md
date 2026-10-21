@@ -60,11 +60,8 @@ profesor pregunta a todos sobre el codigo, asi que todos deben entenderlo.
    notepad src\main\resources\db.properties
    ```
    Cambia `db.usuario` y `db.contrasena` por los tuyos. Guarda.
-3. **Usuario para entrar a la app.** En Workbench ejecuta:
-   ```
-   UPDATE estacionamiento_inteligente.usuario
-   SET contrasena_hash = 'admin123' WHERE usuario_login = 'carlos.ram1';
-   ```
+3. **Usuario para entrar a la app.** No hace falta nada: el script ya trae
+   los usuarios con la contrasena de demo `admin123` (guardada con BCrypt).
 4. **Abrir en NetBeans:** `File > Open Project` > esta carpeta.
 5. **Ejecutar:** F6. Luego abre `http://localhost:8080/login.jsp` y entra con
    `carlos.ram1` / `admin123`.

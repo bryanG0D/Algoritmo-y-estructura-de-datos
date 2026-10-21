@@ -101,19 +101,9 @@ El `.gitignore` evita subir `db.properties` (contrasena), `target/`
 
 ## 5. Iniciar sesion
 
-Los datos de ejemplo del script SQL traen usuarios con "hashes" de
-contrasena ficticios (son datos de prueba, no contrasenas reales). Para
-poder iniciar sesion, actualiza manualmente la contrasena de un usuario a
-un valor simple:
-
-```sql
-UPDATE usuario SET contrasena_hash = 'admin123' WHERE usuario_login = 'carlos.ram1';
-```
-
-Luego entra con usuario `carlos.ram1` y contrasena `admin123` (o el login
-que hayas elegido). Este login compara la contrasena en texto plano contra
-`contrasena_hash` — es una simplificacion academica; en un entorno real se
-usaria un algoritmo como BCrypt.
+Las contrasenas se guardan con BCrypt (`contrasena_hash`), nunca en texto
+plano. Los usuarios de ejemplo del script SQL tienen la contrasena de demo
+`admin123`: entra con usuario `carlos.ram1` y contrasena `admin123`.
 
 ## 6. Que hace cada pantalla
 

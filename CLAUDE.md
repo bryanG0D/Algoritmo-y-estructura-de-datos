@@ -163,9 +163,10 @@ docs/         entregables/diagrama-clases.drawio (UML, 5 paginas; copia en Lucid
 - **Gson y java.time:** en JDK 17+ Gson no puede reflejar `LocalDate` /
   `LocalDateTime`. Todo Servlet usa `GsonProvider.gson()`, nunca `new Gson()`.
 - **Tomcat 9, no 10+:** el proyecto usa `javax.servlet`.
-- **Login:** compara la contrasena en texto plano con `contrasena_hash`
-  (simplificacion academica). Para entrar:
-  `UPDATE usuario SET contrasena_hash='admin123' WHERE usuario_login='carlos.ram1';`
+- **Login:** verifica la contrasena con BCrypt (`org.mindrot:jbcrypt`, solo
+  hashes `$2a$`). Los usuarios del script entran con `admin123`. Un valor en
+  texto plano en `contrasena_hash` ya no permite entrar: para cambiar una
+  contrasena hay que guardar su hash BCrypt.
 - **No validado aun en una PC real:** `mvn jetty:run` con dependencias de
   Maven Central y el `nbactions.xml` (F6 en NetBeans). Las pruebas se hicieron
   en un entorno aislado con MariaDB y su driver JDBC.

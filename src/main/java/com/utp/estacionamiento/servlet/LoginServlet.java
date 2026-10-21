@@ -5,6 +5,7 @@ import com.utp.estacionamiento.util.GsonProvider;
 import com.utp.estacionamiento.dao.UsuarioDAO;
 import com.utp.estacionamiento.dao.UsuarioDAOImpl;
 import com.utp.estacionamiento.modelo.Usuario;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -29,9 +30,7 @@ public class LoginServlet extends HttpServlet {
 
         try {
             Usuario usuario = usuarioDAO.buscarPorLogin(login);
-            // Simplificacion academica: se compara directo contra el valor guardado en contrasena_hash.
-            // En un entorno real se usaria un algoritmo como BCrypt para verificar la contrasena.
-            if (usuario != null && usuario.getContrasenaHash().equals(clave)) {
+            if (usuario != null && claveCorrecta(clave, usuario.getContrasenaHash())) {
                 HttpSession sesion = req.getSession(true);
                 sesion.setAttribute("usuario", usuario);
                 respuesta.put("exito", true);
@@ -48,5 +47,17 @@ public class LoginServlet extends HttpServlet {
 
         resp.setContentType("application/json;charset=UTF-8");
         resp.getWriter().write(gson.toJson(respuesta));
+    }
+
+    // Compara la clave ingresada con el hash BCrypt guardado; un valor que no es BCrypt nunca coincide
+    private boolean claveCorrecta(String clave, String hash) {
+        if (clave == null || hash == null || !hash.startsWith("$2a$")) {
+            return false;
+        }
+        try {
+            return BCrypt.checkpw(clave, hash);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }
