@@ -46,7 +46,8 @@ campoPlaca.addEventListener('change', function () {
     fetch('buscar?placa=' + encodeURIComponent(placa))
         .then(r => r.json())
         .then(r => {
-            if (!r.encontrado) return;
+            // Si la placa ya cambio (o el formulario se limpio), la respuesta llego tarde: se ignora.
+            if (!r.encontrado || campoPlaca.value.trim() !== placa) return;
             const v = r.vehiculo;
             document.getElementById('marca').value = v.marca || '';
             document.getElementById('idTipo').value = v.idTipo;

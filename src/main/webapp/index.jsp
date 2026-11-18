@@ -18,6 +18,11 @@
         <div class="tarjeta"><span class="dato" id="cobradoHoy">-</span><span class="etiqueta">Cobrado hoy</span></div>
     </section>
 
+    <section class="caja cobro-tipos">
+        <h2>Cobrado hoy por tipo de vehículo</h2>
+        <div id="cobroPorTipo"><p class="nota">Cargando...</p></div>
+    </section>
+
     <section class="columnas-inicio">
         <div class="caja">
             <h2>Ocupacion del estacionamiento</h2>
@@ -55,7 +60,32 @@ function cargarResumen() {
             document.getElementById('cobradoHoy').textContent =
                 r.cobradoHoy !== undefined ? 'S/ ' + Number(r.cobradoHoy).toFixed(2) : 'sin datos';
             document.getElementById('vehiculosRegistrados').textContent = r.placasEnArbol;
+            mostrarCobroPorTipo(r.cobradoPorTipo);
         });
+}
+
+function mostrarCobroPorTipo(lista) {
+    const contenedor = document.getElementById('cobroPorTipo');
+    if (!Array.isArray(lista)) {
+        contenedor.innerHTML = '<p class="nota">Sin datos.</p>';
+        return;
+    }
+    const totalCantidad = lista.reduce((suma, t) => suma + Number(t.cantidad), 0);
+    if (totalCantidad === 0) {
+        contenedor.innerHTML = '<p class="nota">Todavía no se cobró ningún ticket hoy.</p>';
+        return;
+    }
+    const ingresoMaximo = Math.max(...lista.map(t => Number(t.ingreso)));
+    let html = '';
+    lista.forEach(t => {
+        const cantidad = Number(t.cantidad);
+        const ingreso = Number(t.ingreso);
+        const porcentaje = ingresoMaximo > 0 ? Math.round((ingreso / ingresoMaximo) * 1000) / 10 : 0;
+        html += '<div class="fila-tipo"><span class="nombre-tipo">' + escaparHtml(t.nombre) + '</span>' +
+            '<div class="pista"><div class="relleno" style="width:' + porcentaje + '%"></div></div>' +
+            '<span class="cifras">' + cantidad + (cantidad === 1 ? ' cobro' : ' cobros') + ' &middot; S/ ' + ingreso.toFixed(2) + '</span></div>';
+    });
+    contenedor.innerHTML = html;
 }
 
 document.getElementById('formBusquedaRapida').addEventListener('submit', function (e) {

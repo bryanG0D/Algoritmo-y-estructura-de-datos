@@ -79,8 +79,23 @@ public class EstacionamientoService {
         ResultadoRegistro resultado = new ResultadoRegistro();
 
         // 1. Busqueda O(log n) en el Arbol AVL
-        boolean yaConocido = arbolPlacas.buscarPorPlaca(placa) != null;
+        Vehiculo conocido = arbolPlacas.buscarPorPlaca(placa);
+        boolean yaConocido = conocido != null;
         String prefijo = yaConocido ? "Vehiculo ya registrado. " : "Vehiculo nuevo registrado. ";
+
+        // Un vehiculo que ya esta dentro no puede recibir otro ticket (se valida aqui y no
+        // solo en la pantalla, porque el formulario puede enviarse antes de que termine el aviso).
+        if (yaConocido) {
+            Ticket activo = buscarTicketActivoDeVehiculo(conocido.getIdVehiculo());
+            if (activo != null) {
+                EspacioEstacionamiento e = matriz.buscarPorId(activo.getIdEspacio());
+                resultado.asignado = false;
+                resultado.mensaje = "Este vehículo ya está dentro (espacio "
+                        + (e != null ? e.getNumeroEspacio() : "-") + ", ticket N.° " + activo.getIdTicket()
+                        + "). Registre primero su salida.";
+                return resultado;
+            }
+        }
 
         // 2. Regla de compatibilidad: a que clase de espacio puede ir
         int tipoEspacio = CompatibilidadEspacio.tipoDeEspacioPara(idTipo);

@@ -2,8 +2,10 @@ package com.utp.estacionamiento.servlet;
 
 import com.google.gson.Gson;
 import com.utp.estacionamiento.util.GsonProvider;
+import com.utp.estacionamiento.dao.ReporteGrupo;
 import com.utp.estacionamiento.dao.ReporteIngresoDia;
 import com.utp.estacionamiento.estructuras.MatrizEstacionamiento;
+import com.utp.estacionamiento.modelo.TipoVehiculo;
 import com.utp.estacionamiento.servicio.CompatibilidadEspacio;
 import com.utp.estacionamiento.servicio.EstacionamientoService;
 import com.utp.estacionamiento.util.AppContextListener;
@@ -16,14 +18,16 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Datos del panel de inicio. La ocupacion sale de la Matriz y los datos del
- * arbol salen del AVL, ambos en memoria; solo lo cobrado hoy se consulta en
- * MySQL con el mismo procedimiento del reporte.
+ * arbol salen del AVL, ambos en memoria; solo lo cobrado hoy (total y por tipo)
+ * se consulta en MySQL con los procedimientos del reporte.
  */
 public class ResumenServlet extends HttpServlet {
 
@@ -60,6 +64,26 @@ public class ResumenServlet extends HttpServlet {
                 cobradoHoy = cobradoHoy.add(d.getIngresoTotal());
             }
             respuesta.put("cobradoHoy", cobradoHoy);
+
+            List<ReporteGrupo> porTipo = servicio.getPagoDAO().reportePorTipo(hoy, hoy);
+            List<Map<String, Object>> cobradoPorTipo = new ArrayList<>();
+            for (TipoVehiculo tipo : servicio.listarTiposVehiculo()) {
+                int cantidad = 0;
+                BigDecimal ingreso = BigDecimal.ZERO;
+                for (ReporteGrupo grupo : porTipo) {
+                    if (grupo.getNombre() != null && grupo.getNombre().equals(tipo.getNombre())) {
+                        cantidad = grupo.getCantidad();
+                        ingreso = grupo.getIngreso() != null ? grupo.getIngreso() : BigDecimal.ZERO;
+                        break;
+                    }
+                }
+                Map<String, Object> fila = new LinkedHashMap<>();
+                fila.put("nombre", tipo.getNombre());
+                fila.put("cantidad", cantidad);
+                fila.put("ingreso", ingreso);
+                cobradoPorTipo.add(fila);
+            }
+            respuesta.put("cobradoPorTipo", cobradoPorTipo);
         } catch (SQLException e) {
             respuesta.put("error", "Error de base de datos: " + e.getMessage());
         }

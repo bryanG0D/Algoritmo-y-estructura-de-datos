@@ -85,6 +85,16 @@ main.panel-inicio { max-width: 1100px; }
 .columnas-inicio { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 16px; }
 .caja { background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 .caja h2 { font-size: 16px; margin: 0 0 12px; }
+.cobro-tipos { margin-top: 16px; }
+.fila-tipo { display: grid; grid-template-columns: 150px 1fr auto; gap: 12px; align-items: center; padding: 6px 0; }
+.fila-tipo .nombre-tipo { font-size: 14px; font-weight: bold; color: #1e293b; }
+.fila-tipo .pista { height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; }
+.fila-tipo .relleno { height: 100%; background: #2563eb; border-radius: 5px; }
+.fila-tipo .cifras { font-size: 14px; color: #334155; white-space: nowrap; }
+@media (max-width: 600px) {
+    .fila-tipo { grid-template-columns: 1fr auto; }
+    .fila-tipo .pista { grid-column: 1 / -1; grid-row: 2; }
+}
 #miniMapa table { width: auto; margin: 0; background: transparent; border-collapse: separate; border-spacing: 3px; }
 #miniMapa td { width: 26px; height: 20px; padding: 0; border: none; border-radius: 3px; }
 .nota { font-size: 13px; color: #64748b; }

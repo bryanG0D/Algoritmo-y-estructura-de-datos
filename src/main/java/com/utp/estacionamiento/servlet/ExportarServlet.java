@@ -37,7 +37,7 @@ import java.util.Map;
 
 /**
  * Exporta a Excel (.xlsx) con Apache POI:
- *   /exportar?que=vehiculos&estado=todos|dentro|fuera&buscar=texto  (lo mismo que se ve en pantalla)
+ *   /exportar?que=vehiculos&periodo=hoy|todos&estado=todos|dentro|fuera&buscar=texto  (lo mismo que se ve en pantalla)
  *   /exportar?que=reporte&fechaInicio=AAAA-MM-DD&fechaFin=AAAA-MM-DD (4 hojas)
  */
 public class ExportarServlet extends HttpServlet {
@@ -105,8 +105,11 @@ public class ExportarServlet extends HttpServlet {
                 hojasReporte(libro, estilos, inicio, fin);
                 archivo = "reporte_" + inicio + "_al_" + fin + ".xlsx";
             } else {
-                hojaVehiculos(libro, estilos, servicio, req.getParameter("estado"), req.getParameter("buscar"));
-                archivo = "vehiculos_" + LocalDate.now() + ".xlsx";
+                String periodo = req.getParameter("periodo");
+                hojaVehiculos(libro, estilos, servicio, req.getParameter("estado"), req.getParameter("buscar"), periodo);
+                archivo = "hoy".equals(periodo)
+                        ? "vehiculos_hoy_" + LocalDate.now() + ".xlsx"
+                        : "vehiculos_" + LocalDate.now() + ".xlsx";
             }
             resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             resp.setHeader("Content-Disposition", "attachment; filename=\"" + archivo + "\"");
@@ -119,20 +122,31 @@ public class ExportarServlet extends HttpServlet {
     }
 
     private void hojaVehiculos(XSSFWorkbook libro, Estilos est, EstacionamientoService servicio,
-                               String estado, String buscar) throws SQLException {
+                               String estado, String buscar, String periodo) throws SQLException {
         Map<Integer, Ticket> visitas = servicio.ultimasVisitasFinalizadas();
         Map<Integer, Ticket> activos = new HashMap<>();
         for (Ticket t : servicio.listarTicketsActivos()) {
             activos.put(t.getIdVehiculo(), t);
         }
         String texto = buscar == null ? "" : buscar.trim().toUpperCase();
+        boolean soloHoy = "hoy".equals(periodo);
+        LocalDate hoy = LocalDate.now();
 
         Sheet hoja = libro.createSheet("Vehiculos");
-        titulo(hoja, est, "Vehiculos registrados - " + LocalDate.now().format(DIA));
+        titulo(hoja, est, soloHoy
+                ? "Vehiculos del dia - " + hoy.format(DIA)
+                : "Vehiculos registrados - " + hoy.format(DIA));
         encabezados(hoja, est, 2, "Placa", "Marca", "Tipo", "Estado", "Ticket", "Espacio", "Entrada", "Salida");
         int fila = 3;
         for (Vehiculo v : servicio.getVehiculoDAO().listarTodos()) {
             Ticket t = activos.get(v.getIdVehiculo());
+            if (soloHoy && t == null) {
+                Ticket visita = visitas.get(v.getIdVehiculo());
+                if (visita == null || visita.getFechaHoraSalida() == null
+                        || !visita.getFechaHoraSalida().toLocalDate().equals(hoy)) {
+                    continue;
+                }
+            }
             if ("dentro".equals(estado) && t == null) continue;
             if ("fuera".equals(estado) && t != null) continue;
             String marca = v.getMarca() == null ? "" : v.getMarca();

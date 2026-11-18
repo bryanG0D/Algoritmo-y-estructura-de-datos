@@ -25,6 +25,12 @@
     </form>
 
     <div class="barra-filtros">
+        <label class="campo-filtro">Período
+            <select id="filtroPeriodo">
+                <option value="hoy" selected>Hoy</option>
+                <option value="todos">Todos los días</option>
+            </select>
+        </label>
         <label class="campo-filtro">Mostrar
             <select id="filtroEstado">
                 <option value="todos">Todos</option>
@@ -70,17 +76,35 @@ function cargarVehiculos() {
         });
 }
 
-// Filtra por estado (todos / dentro / fuera) y por el texto buscado en placa o marca.
+// Devuelve la fecha de hoy del navegador como "AAAA-MM-DD".
+function hoyIso() {
+    const hoy = new Date();
+    const anio = String(hoy.getFullYear());
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    return anio + '-' + mes + '-' + dia;
+}
+
+// Indica si el vehiculo tuvo movimiento hoy: esta dentro o su ultima salida es de hoy.
+function esDeHoy(v) {
+    if (activos[v.idVehiculo]) return true;
+    const visita = ultimasVisitas[v.idVehiculo];
+    return !!visita && typeof visita.salida === 'string' && visita.salida.startsWith(hoyIso());
+}
+
+// Filtra por periodo (hoy / todos), estado (todos / dentro / fuera) y por el texto buscado en placa o marca.
 function mostrarTabla() {
     const texto = document.getElementById('buscar').value.trim().toUpperCase();
     const filtroEstado = document.getElementById('filtroEstado').value;
-    const dentro = vehiculos.filter(v => activos[v.idVehiculo]).length;
+    const periodo = document.getElementById('filtroPeriodo').value;
+    const delPeriodo = periodo === 'hoy' ? vehiculos.filter(esDeHoy) : vehiculos;
+    const dentro = delPeriodo.filter(v => activos[v.idVehiculo]).length;
     const opciones = document.getElementById('filtroEstado').options;
-    opciones[0].textContent = 'Todos (' + vehiculos.length + ')';
+    opciones[0].textContent = 'Todos (' + delPeriodo.length + ')';
     opciones[1].textContent = 'Dentro del estacionamiento (' + dentro + ')';
-    opciones[2].textContent = 'Fuera (' + (vehiculos.length - dentro) + ')';
+    opciones[2].textContent = 'Fuera (' + (delPeriodo.length - dentro) + ')';
 
-    const visibles = vehiculos.filter(v => {
+    const visibles = delPeriodo.filter(v => {
         const estaDentro = !!activos[v.idVehiculo];
         if (filtroEstado === 'dentro' && !estaDentro) return false;
         if (filtroEstado === 'fuera' && estaDentro) return false;
@@ -103,10 +127,14 @@ function mostrarTabla() {
         tbody.appendChild(fila);
     });
     if (visibles.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="sin-resultados">No hay vehiculos que coincidan.</td></tr>';
+        const mensaje = (periodo === 'hoy' && delPeriodo.length === 0)
+            ? 'No hay vehículos con movimiento hoy.'
+            : 'No hay vehiculos que coincidan.';
+        tbody.innerHTML = '<tr><td colspan="6" class="sin-resultados">' + mensaje + '</td></tr>';
     }
 }
 
+document.getElementById('filtroPeriodo').addEventListener('change', mostrarTabla);
 document.getElementById('filtroEstado').addEventListener('change', mostrarTabla);
 document.getElementById('filtroHora').addEventListener('change', mostrarTabla);
 document.getElementById('buscar').addEventListener('input', mostrarTabla);
@@ -114,7 +142,8 @@ document.getElementById('buscar').addEventListener('input', mostrarTabla);
 // Descarga en Excel exactamente lo que se ve con el filtro y la busqueda actuales.
 document.getElementById('botonExportar').addEventListener('click', () => {
     location.href = 'exportar?que=vehiculos&estado=' + document.getElementById('filtroEstado').value +
-        '&buscar=' + encodeURIComponent(document.getElementById('buscar').value.trim());
+        '&buscar=' + encodeURIComponent(document.getElementById('buscar').value.trim()) +
+        '&periodo=' + document.getElementById('filtroPeriodo').value;
 });
 
 
