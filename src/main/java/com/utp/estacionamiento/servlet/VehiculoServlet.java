@@ -38,16 +38,27 @@ public class VehiculoServlet extends HttpServlet {
         Map<String, Object> respuesta = new HashMap<>();
         try {
             respuesta.put("vehiculos", servicio().getVehiculoDAO().listarTodos());
-            // Vehiculos que estan dentro: idVehiculo -> numero de ticket y espacio
+            // Vehiculos que estan dentro: idVehiculo -> numero de ticket, espacio y hora de entrada
             Map<Integer, Map<String, Object>> activos = new HashMap<>();
             for (Ticket t : servicio().listarTicketsActivos()) {
                 Map<String, Object> dato = new HashMap<>();
                 dato.put("idTicket", t.getIdTicket());
                 EspacioEstacionamiento e = servicio().getMatriz().buscarPorId(t.getIdEspacio());
                 dato.put("numeroEspacio", e != null ? e.getNumeroEspacio() : null);
+                dato.put("entrada", t.getFechaHoraEntrada());
                 activos.put(t.getIdVehiculo(), dato);
             }
             respuesta.put("activos", activos);
+            // Ultima visita finalizada por vehiculo: idVehiculo -> hora de entrada y salida
+            Map<Integer, Map<String, Object>> ultimasVisitas = new HashMap<>();
+            for (Map.Entry<Integer, Ticket> entrada : servicio().ultimasVisitasFinalizadas().entrySet()) {
+                Ticket t = entrada.getValue();
+                Map<String, Object> dato = new HashMap<>();
+                dato.put("entrada", t.getFechaHoraEntrada());
+                dato.put("salida", t.getFechaHoraSalida());
+                ultimasVisitas.put(entrada.getKey(), dato);
+            }
+            respuesta.put("ultimasVisitas", ultimasVisitas);
         } catch (SQLException e) {
             respuesta.put("error", e.getMessage());
         }

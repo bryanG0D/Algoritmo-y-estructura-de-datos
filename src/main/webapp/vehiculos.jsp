@@ -15,7 +15,7 @@
         <p class="aviso-edicion" id="avisoEdicion" hidden></p>
         <input type="hidden" name="idVehiculo" id="idVehiculo">
         <label>Placa</label>
-        <input type="text" name="placa" id="placa" maxlength="10" placeholder="Ej. ABC-123" autocomplete="off" required>
+        <input type="text" name="placa" id="placa" maxlength="7" placeholder="Ej. M4O-634" autocomplete="off" required>
         <label>Tipo</label>
         <select name="idTipo" id="idTipo" required></select>
         <label>Marca <span class="opcional">(opcional)</span></label>
@@ -32,6 +32,12 @@
                 <option value="fuera">Fuera</option>
             </select>
         </label>
+        <label class="campo-filtro">Ver hora
+            <select id="filtroHora">
+                <option value="estado" selected>Según estado</option>
+                <option value="ambas">Entrada y salida</option>
+            </select>
+        </label>
         <label class="campo-filtro campo-buscar">Buscar
             <input type="text" id="buscar" placeholder="Placa o marca" autocomplete="off">
         </label>
@@ -40,7 +46,7 @@
 
     <table id="tablaVehiculos">
         <thead>
-        <tr><th>Placa</th><th>Marca</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr>
+        <tr><th>Placa</th><th>Marca</th><th>Tipo</th><th>Estado</th><th>Hora</th><th>Acciones</th></tr>
         </thead>
         <tbody></tbody>
     </table>
@@ -49,8 +55,9 @@
 <script>
 cargarTiposVehiculo('idTipo');
 normalizarPlaca(document.getElementById('placa'));
+normalizarPlaca(document.getElementById('buscar'), true);
 
-let vehiculos = [], activos = {}, vehiculoEditando = null;
+let vehiculos = [], activos = {}, ultimasVisitas = {}, vehiculoEditando = null;
 
 function cargarVehiculos() {
     fetch('vehiculos')
@@ -58,6 +65,7 @@ function cargarVehiculos() {
         .then(r => {
             vehiculos = r.vehiculos || [];
             activos = r.activos || {};
+            ultimasVisitas = r.ultimasVisitas || {};
             mostrarTabla();
         });
 }
@@ -85,7 +93,8 @@ function mostrarTabla() {
         const fila = document.createElement('tr');
         fila.innerHTML = [v.placa, v.marca, v.nombreTipo]
             .map(dato => '<td>' + (dato ? escaparHtml(dato) : '-') + '</td>').join('') +
-            '<td>' + estadoVehiculo(activos[v.idVehiculo]) + '</td><td></td>';
+            '<td>' + estadoVehiculo(activos[v.idVehiculo]) + '</td>' +
+            '<td>' + horaVehiculo(v.idVehiculo) + '</td><td></td>';
         const btnEditar = document.createElement('button');
         btnEditar.type = 'button';
         btnEditar.textContent = 'Editar';
@@ -94,11 +103,12 @@ function mostrarTabla() {
         tbody.appendChild(fila);
     });
     if (visibles.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="sin-resultados">No hay vehiculos que coincidan.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="sin-resultados">No hay vehiculos que coincidan.</td></tr>';
     }
 }
 
 document.getElementById('filtroEstado').addEventListener('change', mostrarTabla);
+document.getElementById('filtroHora').addEventListener('change', mostrarTabla);
 document.getElementById('buscar').addEventListener('input', mostrarTabla);
 
 // Descarga en Excel exactamente lo que se ve con el filtro y la busqueda actuales.
@@ -112,6 +122,57 @@ function estadoVehiculo(activo) {
     if (!activo) return '<span class="estado-fuera">Fuera</span>';
     return '<a class="estado-dentro" href="salida.jsp?ticket=' + activo.idTicket + '">Dentro &middot; Ticket N.&deg; ' +
         activo.idTicket + ' &middot; ' + escaparHtml(activo.numeroEspacio) + '</a>';
+}
+
+// Convierte un ISO "AAAA-MM-DDTHH:MM[:SS]" en un texto corto y legible.
+// Devuelve '' si el valor no tiene el formato esperado.
+function formatoFecha(iso) {
+    if (!iso || typeof iso !== 'string') return '';
+    const texto = iso.trim();
+    if (texto.length < 16) return '';
+    if (texto.charAt(4) !== '-' || texto.charAt(7) !== '-' || texto.charAt(10) !== 'T' || texto.charAt(13) !== ':') return '';
+    const anio = texto.substring(0, 4);
+    const mes = texto.substring(5, 7);
+    const dia = texto.substring(8, 10);
+    const hora = texto.substring(11, 16);
+    if (!/^\d{4}$/.test(anio) || !/^\d{2}$/.test(mes) || !/^\d{2}$/.test(dia) || !/^\d{2}:\d{2}$/.test(hora)) return '';
+
+    const hoy = new Date();
+    const anioHoy = String(hoy.getFullYear());
+    const mesHoy = String(hoy.getMonth() + 1).padStart(2, '0');
+    const diaHoy = String(hoy.getDate()).padStart(2, '0');
+
+    if (anio === anioHoy && mes === mesHoy && dia === diaHoy) return 'hoy ' + hora;
+    if (anio === anioHoy) return dia + '/' + mes + ' ' + hora;
+    return dia + '/' + mes + '/' + anio + ' ' + hora;
+}
+
+// Arma la celda de hora segun el estado del vehiculo y el modo elegido en "Ver hora".
+function horaVehiculo(idVehiculo) {
+    const activo = activos[idVehiculo];
+    const visita = ultimasVisitas[idVehiculo];
+    const modo = document.getElementById('filtroHora').value;
+    let principal = '';
+    let detalle = '';
+
+    if (activo) {
+        const entrada = formatoFecha(activo.entrada);
+        principal = entrada ? 'Entró ' + entrada : 'Dentro';
+        if (modo === 'ambas') detalle = 'Aún dentro';
+    } else if (visita) {
+        if (modo === 'ambas') {
+            principal = 'Entró ' + formatoFecha(visita.entrada);
+            detalle = 'Salió ' + formatoFecha(visita.salida);
+        } else {
+            principal = 'Salió ' + formatoFecha(visita.salida);
+        }
+    } else {
+        return '<span class="estado-fuera">Sin visitas</span>';
+    }
+
+    let html = '<span class="hora-principal">' + escaparHtml(principal) + '</span>';
+    if (detalle) html += '<span class="hora-detalle">' + escaparHtml(detalle) + '</span>';
+    return html;
 }
 
 function cargarEnFormulario(v) {

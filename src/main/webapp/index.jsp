@@ -33,7 +33,7 @@
             <h2>Buscar vehiculo por placa</h2>
             <p class="nota">Para clientes que perdieron su ticket o para ubicar un vehiculo.</p>
             <form id="formBusquedaRapida" class="busqueda-rapida">
-                <input type="text" id="placaRapida" placeholder="Ej. ABC-123" required>
+                <input type="text" id="placaRapida" maxlength="7" placeholder="Ej. M4O-634" autocomplete="off" required>
                 <button type="submit">Buscar</button>
             </form>
             <div id="resultadoRapido"></div>
@@ -44,6 +44,7 @@
 
 <script src="js/main.js?v=<%= new java.io.File(application.getRealPath("/js/main.js")).lastModified() %>"></script>
 <script>
+normalizarPlaca(document.getElementById('placaRapida'));
 function cargarResumen() {
     fetch('resumen')
         .then(r => r.json())

@@ -13,7 +13,7 @@
     <h2 class="titulo-pagina">Registrar entrada</h2>
     <form id="formEntrada">
         <label>Placa</label>
-        <input type="text" name="placa" id="placa" maxlength="10" placeholder="Ej. ABC-123" autocomplete="off" required>
+        <input type="text" name="placa" id="placa" maxlength="7" placeholder="Ej. M4O-634" autocomplete="off" required>
         <p id="avisoPlaca" class="nota"></p>
         <label>Tipo de vehiculo</label>
         <select name="idTipo" id="idTipo" required></select>

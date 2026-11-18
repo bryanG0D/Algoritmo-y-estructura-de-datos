@@ -13,7 +13,7 @@
     <h2 class="titulo-pagina">Registrar salida</h2>
     <form id="formConsulta">
         <label>Numero de ticket o placa</label>
-        <input type="text" id="consulta" placeholder="Ej. 31 o ABC-123" autocomplete="off" required>
+        <input type="text" id="consulta" placeholder="Ej. 31 o M4O-634" autocomplete="off" required>
         <button type="submit">Buscar</button>
     </form>
 
@@ -33,6 +33,7 @@
 <script src="js/main.js?v=<%= new java.io.File(application.getRealPath("/js/main.js")).lastModified() %>"></script>
 <script>
 const campoConsulta = document.getElementById('consulta');
+normalizarPlaca(campoConsulta, true);
 const formCobro = document.getElementById('formCobro');
 const resultado = document.getElementById('resultado');
 

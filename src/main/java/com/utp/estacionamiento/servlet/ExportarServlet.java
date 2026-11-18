@@ -29,6 +29,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +43,7 @@ import java.util.Map;
 public class ExportarServlet extends HttpServlet {
 
     private static final DateTimeFormatter DIA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter FECHA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final PagoDAO pagoDAO = new PagoDAOImpl();
 
@@ -118,6 +120,7 @@ public class ExportarServlet extends HttpServlet {
 
     private void hojaVehiculos(XSSFWorkbook libro, Estilos est, EstacionamientoService servicio,
                                String estado, String buscar) throws SQLException {
+        Map<Integer, Ticket> visitas = servicio.ultimasVisitasFinalizadas();
         Map<Integer, Ticket> activos = new HashMap<>();
         for (Ticket t : servicio.listarTicketsActivos()) {
             activos.put(t.getIdVehiculo(), t);
@@ -126,7 +129,7 @@ public class ExportarServlet extends HttpServlet {
 
         Sheet hoja = libro.createSheet("Vehiculos");
         titulo(hoja, est, "Vehiculos registrados - " + LocalDate.now().format(DIA));
-        encabezados(hoja, est, 2, "Placa", "Marca", "Tipo", "Estado", "Ticket", "Espacio");
+        encabezados(hoja, est, 2, "Placa", "Marca", "Tipo", "Estado", "Ticket", "Espacio", "Entrada", "Salida");
         int fila = 3;
         for (Vehiculo v : servicio.getVehiculoDAO().listarTodos()) {
             Ticket t = activos.get(v.getIdVehiculo());
@@ -143,10 +146,31 @@ public class ExportarServlet extends HttpServlet {
             celda(r, 4, t == null ? "" : String.valueOf(t.getIdTicket()), est.texto);
             EspacioEstacionamiento e = t == null ? null : servicio.getMatriz().buscarPorId(t.getIdEspacio());
             celda(r, 5, e == null ? "" : e.getNumeroEspacio(), est.texto);
+            String entrada;
+            String salida;
+            if (t != null) {
+                entrada = formatearFechaHora(t.getFechaHoraEntrada());
+                salida = "Aún dentro";
+            } else {
+                Ticket visita = visitas.get(v.getIdVehiculo());
+                if (visita != null) {
+                    entrada = formatearFechaHora(visita.getFechaHoraEntrada());
+                    salida = formatearFechaHora(visita.getFechaHoraSalida());
+                } else {
+                    entrada = "";
+                    salida = "";
+                }
+            }
+            celda(r, 6, entrada, est.texto);
+            celda(r, 7, salida, est.texto);
         }
         Row r = hoja.createRow(fila + 1);
         celda(r, 0, "Total: " + (fila - 3) + " vehiculos", est.total);
-        ajustarColumnas(hoja, 6);
+        ajustarColumnas(hoja, 8);
+    }
+
+    private static String formatearFechaHora(LocalDateTime fecha) {
+        return fecha == null ? "" : fecha.format(FECHA_HORA);
     }
 
     private void hojasReporte(XSSFWorkbook libro, Estilos est, LocalDate inicio, LocalDate fin) throws SQLException {

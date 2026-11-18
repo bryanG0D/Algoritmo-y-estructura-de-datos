@@ -24,7 +24,9 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Nucleo "inteligente" del sistema. Integra dos estructuras en memoria con
@@ -178,6 +180,20 @@ public class EstacionamientoService {
 
     public List<Ticket> listarTicketsActivos() throws SQLException {
         return ticketDAO.listarActivos();
+    }
+
+    /**
+     * Ultima visita terminada de cada vehiculo: idVehiculo -> ticket FINALIZADO mas reciente.
+     * listarTodos() viene ordenado por entrada descendente: el primero que aparece es el ultimo.
+     */
+    public Map<Integer, Ticket> ultimasVisitasFinalizadas() throws SQLException {
+        Map<Integer, Ticket> ultimas = new HashMap<>();
+        for (Ticket t : ticketDAO.listarTodos()) {
+            if ("FINALIZADO".equals(t.getEstadoTicket()) && t.getFechaHoraSalida() != null) {
+                ultimas.putIfAbsent(t.getIdVehiculo(), t);
+            }
+        }
+        return ultimas;
     }
 
     /** Lo que se imprime en el ticket y se muestra antes de cobrar. */

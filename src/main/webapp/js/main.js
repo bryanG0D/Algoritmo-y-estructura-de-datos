@@ -69,8 +69,19 @@ function htmlTicket(t) {
         '</div>';
 }
 
-function normalizarPlaca(input) {
-    input.addEventListener('input', () => { input.value = input.value.toUpperCase().replace(/\s/g, ''); });
+// Placa peruana: letra, numero, letra - numero, numero, numero (ej. M4O-634).
+// El guion se agrega solo al completar los 3 primeros caracteres; al borrar no se vuelve a poner.
+// mixto = true en campos que tambien aceptan marca o N.° de ticket: solo se toca el texto
+// si empieza como placa (letra, numero, letra), asi "Toyota" o "31" quedan igual.
+function normalizarPlaca(input, mixto) {
+    input.addEventListener('input', e => {
+        const borrando = (e.inputType || '').startsWith('delete');
+        const limpio = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (mixto && !/^[A-Z][0-9][A-Z]/.test(limpio)) return;
+        const placa = limpio.slice(0, 6);
+        input.value = placa.length > 3 || (placa.length === 3 && !borrando)
+            ? placa.slice(0, 3) + '-' + placa.slice(3) : placa;
+    });
 }
 
 function fichaVehiculo(r) {
