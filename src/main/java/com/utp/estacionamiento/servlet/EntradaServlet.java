@@ -27,20 +27,21 @@ public class EntradaServlet extends HttpServlet {
             EstacionamientoService servicio = (EstacionamientoService)
                     getServletContext().getAttribute(AppContextListener.ATRIBUTO_SERVICIO);
 
-            String placa = req.getParameter("placa").toUpperCase();
-            String marca = req.getParameter("marca");
-            String modelo = req.getParameter("modelo");
-            String color = req.getParameter("color");
+            String placa = req.getParameter("placa").trim().toUpperCase();
+            String marca = opcional(req.getParameter("marca"));
             int idTipo = Integer.parseInt(req.getParameter("idTipo"));
             int idUsuario = obtenerIdUsuarioSesion(req);
 
             EstacionamientoService.ResultadoRegistro r =
-                    servicio.registrarEntrada(placa, marca, modelo, color, idTipo, idUsuario);
+                    servicio.registrarEntrada(placa, marca, idTipo, idUsuario);
 
             respuesta.put("asignado", r.asignado);
             respuesta.put("idTicket", r.idTicket);
             respuesta.put("numeroEspacio", r.numeroEspacio);
             respuesta.put("mensaje", r.mensaje);
+            if (r.asignado) {
+                respuesta.put("ticket", servicio.detalleTicket(r.idTicket)); // datos para imprimir el ticket
+            }
         } catch (SQLException e) {
             respuesta.put("error", "Error de base de datos: " + e.getMessage());
         } catch (Exception e) {
@@ -57,5 +58,10 @@ public class EntradaServlet extends HttpServlet {
             return ((Usuario) sesion.getAttribute("usuario")).getIdUsuario();
         }
         return 1; // usuario por defecto si no hay sesion activa
+    }
+
+    /** La marca es opcional: si llega vacia se guarda como NULL. */
+    private static String opcional(String valor) {
+        return (valor == null || valor.trim().isEmpty()) ? null : valor.trim();
     }
 }

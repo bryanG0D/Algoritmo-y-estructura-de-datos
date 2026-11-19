@@ -1,30 +1,24 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%
-    if (session.getAttribute("usuario") == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
-%>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Mapa del estacionamiento</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<%= new java.io.File(application.getRealPath("/css/style.css")).lastModified() %>">
 </head>
 <body>
-<header class="barra-superior">
-    <h1>Mapa del estacionamiento</h1>
-    <a href="index.jsp" class="boton-salir">Volver</a>
-</header>
+<% String paginaActual = "mapa"; %>
+<%@ include file="/WEB-INF/menu.jspf" %>
 <main>
+    <h2 class="titulo-pagina">Mapa del estacionamiento</h2>
     <div id="leyenda">
         <span class="celda libre"></span> Libre
         <span class="celda ocupado"></span> Ocupado
+        &nbsp; Columna 10 (borde azul): espacios para motos y bicicletas
     </div>
     <div id="matriz"></div>
 </main>
-<script src="js/main.js"></script>
+<script src="js/main.js?v=<%= new java.io.File(application.getRealPath("/js/main.js")).lastModified() %>"></script>
 <script>
 function cargarMapa() {
     fetch('mapa')
@@ -46,7 +40,8 @@ function cargarMapa() {
                     const espacio = espacios.find(e => e.fila === f && e.columna === c);
                     const celda = document.createElement('td');
                     if (espacio) {
-                        celda.className = 'celda ' + (espacio.estado === 'LIBRE' ? 'libre' : 'ocupado');
+                        celda.className = 'celda ' + (espacio.estado === 'LIBRE' ? 'libre' : 'ocupado') +
+                            (espacio.idTipoPermitido === 2 ? ' moto' : '');
                         celda.title = espacio.numeroEspacio;
                         celda.textContent = espacio.numeroEspacio;
                     }

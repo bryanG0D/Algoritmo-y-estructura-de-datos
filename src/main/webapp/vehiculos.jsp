@@ -1,94 +1,239 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%
-    if (session.getAttribute("usuario") == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
-%>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Vehiculos</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=<%= new java.io.File(application.getRealPath("/css/style.css")).lastModified() %>">
 </head>
 <body>
-<header class="barra-superior">
-    <h1>Gestion de vehiculos</h1>
-    <a href="index.jsp" class="boton-salir">Volver</a>
-</header>
+<% String paginaActual = "vehiculos"; %>
+<%@ include file="/WEB-INF/menu.jspf" %>
 <main>
+    <h2 class="titulo-pagina">Gestion de vehiculos</h2>
     <form id="formVehiculo">
+        <p class="aviso-edicion" id="avisoEdicion" hidden></p>
         <input type="hidden" name="idVehiculo" id="idVehiculo">
         <label>Placa</label>
-        <input type="text" name="placa" id="placa" required>
-        <label>Marca</label>
-        <input type="text" name="marca" id="marca" required>
-        <label>Modelo</label>
-        <input type="text" name="modelo" id="modelo" required>
-        <label>Color</label>
-        <input type="text" name="color" id="color" required>
+        <input type="text" name="placa" id="placa" maxlength="7" placeholder="Ej. M4O-634" autocomplete="off" required>
         <label>Tipo</label>
         <select name="idTipo" id="idTipo" required></select>
+        <label>Marca <span class="opcional">(opcional)</span></label>
+        <input type="text" name="marca" id="marca" maxlength="30">
         <button type="submit" id="botonGuardar">Agregar</button>
+        <button type="button" id="botonCancelar" class="boton-secundario" hidden>Cancelar edicion</button>
     </form>
+
+    <div class="barra-filtros">
+        <label class="campo-filtro">Período
+            <select id="filtroPeriodo">
+                <option value="hoy" selected>Hoy</option>
+                <option value="todos">Todos los días</option>
+            </select>
+        </label>
+        <label class="campo-filtro">Mostrar
+            <select id="filtroEstado">
+                <option value="todos">Todos</option>
+                <option value="dentro">Dentro del estacionamiento</option>
+                <option value="fuera">Fuera</option>
+            </select>
+        </label>
+        <label class="campo-filtro">Ver hora
+            <select id="filtroHora">
+                <option value="estado" selected>Según estado</option>
+                <option value="ambas">Entrada y salida</option>
+            </select>
+        </label>
+        <label class="campo-filtro campo-buscar">Buscar
+            <input type="text" id="buscar" placeholder="Placa o marca" autocomplete="off">
+        </label>
+        <button type="button" id="botonExportar" class="boton-excel">Exportar a Excel</button>
+    </div>
 
     <table id="tablaVehiculos">
         <thead>
-        <tr><th>Placa</th><th>Marca</th><th>Modelo</th><th>Color</th><th>Tipo</th><th>Acciones</th></tr>
+        <tr><th>Placa</th><th>Marca</th><th>Tipo</th><th>Estado</th><th>Hora</th><th>Acciones</th></tr>
         </thead>
         <tbody></tbody>
     </table>
 </main>
-<script src="js/main.js"></script>
+<script src="js/main.js?v=<%= new java.io.File(application.getRealPath("/js/main.js")).lastModified() %>"></script>
 <script>
 cargarTiposVehiculo('idTipo');
+normalizarPlaca(document.getElementById('placa'));
+normalizarPlaca(document.getElementById('buscar'), true);
+
+let vehiculos = [], activos = {}, ultimasVisitas = {}, vehiculoEditando = null;
 
 function cargarVehiculos() {
     fetch('vehiculos')
         .then(r => r.json())
         .then(r => {
-            const tbody = document.querySelector('#tablaVehiculos tbody');
-            tbody.innerHTML = '';
-            (r.vehiculos || []).forEach(v => {
-                const fila = document.createElement('tr');
-                fila.innerHTML = '<td>' + v.placa + '</td><td>' + v.marca + '</td><td>' +
-                    v.modelo + '</td><td>' + v.color + '</td><td>' + v.nombreTipo + '</td><td></td>';
-                const celdaAcciones = fila.lastElementChild;
-
-                const btnEditar = document.createElement('button');
-                btnEditar.type = 'button';
-                btnEditar.textContent = 'Editar';
-                btnEditar.onclick = () => cargarEnFormulario(v);
-                celdaAcciones.appendChild(btnEditar);
-
-                const btnEliminar = document.createElement('button');
-                btnEliminar.type = 'button';
-                btnEliminar.textContent = 'Eliminar';
-                btnEliminar.onclick = () => eliminarVehiculo(v.idVehiculo);
-                celdaAcciones.appendChild(btnEliminar);
-
-                tbody.appendChild(fila);
-            });
+            vehiculos = r.vehiculos || [];
+            activos = r.activos || {};
+            ultimasVisitas = r.ultimasVisitas || {};
+            mostrarTabla();
         });
 }
 
-function cargarEnFormulario(v) {
-    document.getElementById('idVehiculo').value = v.idVehiculo;
-    document.getElementById('placa').value = v.placa;
-    document.getElementById('marca').value = v.marca;
-    document.getElementById('modelo').value = v.modelo;
-    document.getElementById('color').value = v.color;
-    document.getElementById('idTipo').value = v.idTipo;
-    document.getElementById('botonGuardar').textContent = 'Actualizar';
+// Devuelve la fecha de hoy del navegador como "AAAA-MM-DD".
+function hoyIso() {
+    const hoy = new Date();
+    const anio = String(hoy.getFullYear());
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    return anio + '-' + mes + '-' + dia;
 }
 
-function eliminarVehiculo(id) {
-    const datos = new URLSearchParams();
-    datos.append('accion', 'eliminar');
-    datos.append('idVehiculo', id);
-    fetch('vehiculos', { method: 'POST', body: datos }).then(cargarVehiculos);
+// Indica si el vehiculo tuvo movimiento hoy: esta dentro o su ultima salida es de hoy.
+function esDeHoy(v) {
+    if (activos[v.idVehiculo]) return true;
+    const visita = ultimasVisitas[v.idVehiculo];
+    return !!visita && typeof visita.salida === 'string' && visita.salida.startsWith(hoyIso());
 }
+
+// Filtra por periodo (hoy / todos), estado (todos / dentro / fuera) y por el texto buscado en placa o marca.
+function mostrarTabla() {
+    const texto = document.getElementById('buscar').value.trim().toUpperCase();
+    const filtroEstado = document.getElementById('filtroEstado').value;
+    const periodo = document.getElementById('filtroPeriodo').value;
+    const delPeriodo = periodo === 'hoy' ? vehiculos.filter(esDeHoy) : vehiculos;
+    const dentro = delPeriodo.filter(v => activos[v.idVehiculo]).length;
+    const opciones = document.getElementById('filtroEstado').options;
+    opciones[0].textContent = 'Todos (' + delPeriodo.length + ')';
+    opciones[1].textContent = 'Dentro del estacionamiento (' + dentro + ')';
+    opciones[2].textContent = 'Fuera (' + (delPeriodo.length - dentro) + ')';
+
+    const visibles = delPeriodo.filter(v => {
+        const estaDentro = !!activos[v.idVehiculo];
+        if (filtroEstado === 'dentro' && !estaDentro) return false;
+        if (filtroEstado === 'fuera' && estaDentro) return false;
+        return !texto || v.placa.includes(texto) || (v.marca || '').toUpperCase().includes(texto);
+    });
+
+    const tbody = document.querySelector('#tablaVehiculos tbody');
+    tbody.innerHTML = '';
+    visibles.forEach(v => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = [v.placa, v.marca, v.nombreTipo]
+            .map(dato => '<td>' + (dato ? escaparHtml(dato) : '-') + '</td>').join('') +
+            '<td>' + estadoVehiculo(activos[v.idVehiculo]) + '</td>' +
+            '<td>' + horaVehiculo(v.idVehiculo) + '</td><td></td>';
+        const btnEditar = document.createElement('button');
+        btnEditar.type = 'button';
+        btnEditar.textContent = 'Editar';
+        btnEditar.onclick = () => cargarEnFormulario(v);
+        fila.lastElementChild.appendChild(btnEditar);
+        tbody.appendChild(fila);
+    });
+    if (visibles.length === 0) {
+        const mensaje = (periodo === 'hoy' && delPeriodo.length === 0)
+            ? 'No hay vehículos con movimiento hoy.'
+            : 'No hay vehiculos que coincidan.';
+        tbody.innerHTML = '<tr><td colspan="6" class="sin-resultados">' + mensaje + '</td></tr>';
+    }
+}
+
+document.getElementById('filtroPeriodo').addEventListener('change', mostrarTabla);
+document.getElementById('filtroEstado').addEventListener('change', mostrarTabla);
+document.getElementById('filtroHora').addEventListener('change', mostrarTabla);
+document.getElementById('buscar').addEventListener('input', mostrarTabla);
+
+// Descarga en Excel exactamente lo que se ve con el filtro y la busqueda actuales.
+document.getElementById('botonExportar').addEventListener('click', () => {
+    location.href = 'exportar?que=vehiculos&estado=' + document.getElementById('filtroEstado').value +
+        '&buscar=' + encodeURIComponent(document.getElementById('buscar').value.trim()) +
+        '&periodo=' + document.getElementById('filtroPeriodo').value;
+});
+
+
+function estadoVehiculo(activo) {
+    if (!activo) return '<span class="estado-fuera">Fuera</span>';
+    return '<a class="estado-dentro" href="salida.jsp?ticket=' + activo.idTicket + '">Dentro &middot; Ticket N.&deg; ' +
+        activo.idTicket + ' &middot; ' + escaparHtml(activo.numeroEspacio) + '</a>';
+}
+
+// Convierte un ISO "AAAA-MM-DDTHH:MM[:SS]" en un texto corto y legible.
+// Devuelve '' si el valor no tiene el formato esperado.
+function formatoFecha(iso) {
+    if (!iso || typeof iso !== 'string') return '';
+    const texto = iso.trim();
+    if (texto.length < 16) return '';
+    if (texto.charAt(4) !== '-' || texto.charAt(7) !== '-' || texto.charAt(10) !== 'T' || texto.charAt(13) !== ':') return '';
+    const anio = texto.substring(0, 4);
+    const mes = texto.substring(5, 7);
+    const dia = texto.substring(8, 10);
+    const hora = texto.substring(11, 16);
+    if (!/^\d{4}$/.test(anio) || !/^\d{2}$/.test(mes) || !/^\d{2}$/.test(dia) || !/^\d{2}:\d{2}$/.test(hora)) return '';
+
+    const hoy = new Date();
+    const anioHoy = String(hoy.getFullYear());
+    const mesHoy = String(hoy.getMonth() + 1).padStart(2, '0');
+    const diaHoy = String(hoy.getDate()).padStart(2, '0');
+
+    if (anio === anioHoy && mes === mesHoy && dia === diaHoy) return 'hoy ' + hora;
+    if (anio === anioHoy) return dia + '/' + mes + ' ' + hora;
+    return dia + '/' + mes + '/' + anio + ' ' + hora;
+}
+
+// Arma la celda de hora segun el estado del vehiculo y el modo elegido en "Ver hora".
+function horaVehiculo(idVehiculo) {
+    const activo = activos[idVehiculo];
+    const visita = ultimasVisitas[idVehiculo];
+    const modo = document.getElementById('filtroHora').value;
+    let principal = '';
+    let detalle = '';
+
+    if (activo) {
+        const entrada = formatoFecha(activo.entrada);
+        principal = entrada ? 'Entró ' + entrada : 'Dentro';
+        if (modo === 'ambas') detalle = 'Aún dentro';
+    } else if (visita) {
+        if (modo === 'ambas') {
+            principal = 'Entró ' + formatoFecha(visita.entrada);
+            detalle = 'Salió ' + formatoFecha(visita.salida);
+        } else {
+            principal = 'Salió ' + formatoFecha(visita.salida);
+        }
+    } else {
+        return '<span class="estado-fuera">Sin visitas</span>';
+    }
+
+    let html = '<span class="hora-principal">' + escaparHtml(principal) + '</span>';
+    if (detalle) html += '<span class="hora-detalle">' + escaparHtml(detalle) + '</span>';
+    return html;
+}
+
+function cargarEnFormulario(v) {
+    vehiculoEditando = v;
+    document.getElementById('idVehiculo').value = v.idVehiculo;
+    document.getElementById('placa').value = v.placa;
+    document.getElementById('marca').value = v.marca || '';
+    document.getElementById('idTipo').value = v.idTipo;
+    document.getElementById('botonGuardar').textContent = 'Guardar cambios';
+    document.getElementById('botonCancelar').hidden = false;
+    const avisoEdicion = document.getElementById('avisoEdicion');
+    avisoEdicion.textContent = 'Editando el vehiculo ' + v.placa;
+    avisoEdicion.hidden = false;
+    document.getElementById('formVehiculo').classList.add('editando');
+    mostrarAviso('Editando el vehiculo ' + v.placa + '. Corrige los datos y pulsa "Guardar cambios".', 'info');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('placa').focus();
+}
+
+// Vuelve el formulario al modo "Agregar".
+function salirDeEdicion() {
+    const form = document.getElementById('formVehiculo');
+    form.reset();
+    form.classList.remove('editando');
+    vehiculoEditando = null;
+    document.getElementById('idVehiculo').value = '';
+    document.getElementById('botonGuardar').textContent = 'Agregar';
+    document.getElementById('botonCancelar').hidden = true;
+    document.getElementById('avisoEdicion').hidden = true;
+}
+
+document.getElementById('botonCancelar').addEventListener('click', salirDeEdicion);
 
 document.getElementById('formVehiculo').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -98,10 +243,16 @@ document.getElementById('formVehiculo').addEventListener('submit', function (e) 
 
     fetch('vehiculos', { method: 'POST', body: datos })
         .then(r => r.json())
-        .then(() => {
-            e.target.reset();
-            document.getElementById('idVehiculo').value = '';
-            document.getElementById('botonGuardar').textContent = 'Agregar';
+        .then(r => {
+            if (!r.exito) { mostrarAviso(r.mensaje, 'error'); return; }
+            // Si el vehiculo esta dentro, se ofrece reimprimir su ticket con los datos corregidos.
+            const original = vehiculoEditando;
+            const cambio = original && (original.placa !== datos.get('placa').toUpperCase() ||
+                (original.marca || '') !== datos.get('marca').trim() || String(original.idTipo) !== datos.get('idTipo'));
+            const activo = cambio && activos[idVehiculo];
+            mostrarAviso(r.mensaje + ' (' + datos.get('placa').toUpperCase() + ')', 'exito',
+                activo ? { texto: 'Reimprimir ticket', alHacerClic: () => reimprimirTicket(activo.idTicket) } : null);
+            salirDeEdicion();
             cargarVehiculos();
         });
 });

@@ -22,22 +22,20 @@ import java.util.List;
 public class TicketDAOImpl implements TicketDAO {
 
     @Override
-    public ResultadoEntrada registrarEntrada(String placa, String marca, String modelo, String color,
+    public ResultadoEntrada registrarEntrada(String placa, String marca,
                                               int idTipo, int idUsuario, int idEspacio) throws SQLException {
-        String sql = "{CALL sp_registrar_entrada(?, ?, ?, ?, ?, ?, ?, ?)}";
+        String sql = "{CALL sp_registrar_entrada(?, ?, ?, ?, ?, ?)}";
         try (Connection con = ConexionBD.obtenerConexion();
              CallableStatement cs = con.prepareCall(sql)) {
             cs.setString(1, placa);
             cs.setString(2, marca);
-            cs.setString(3, modelo);
-            cs.setString(4, color);
-            cs.setInt(5, idTipo);
-            cs.setInt(6, idUsuario);
-            cs.setInt(7, idEspacio);
-            cs.registerOutParameter(8, Types.INTEGER);
+            cs.setInt(3, idTipo);
+            cs.setInt(4, idUsuario);
+            cs.setInt(5, idEspacio);
+            cs.registerOutParameter(6, Types.INTEGER);
             cs.execute();
 
-            int idTicketOut = cs.getInt(8);
+            int idTicketOut = cs.getInt(6);
             Integer idTicket = cs.wasNull() ? null : idTicketOut;
 
             int idVehiculo = obtenerIdVehiculoPorPlaca(con, placa);

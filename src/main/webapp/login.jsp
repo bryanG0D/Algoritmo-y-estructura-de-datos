@@ -3,12 +3,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ingresar - Estacionamiento Inteligente</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Ingresar - Estacionamiento</title>
+    <link rel="stylesheet" href="css/style.css?v=<%= new java.io.File(application.getRealPath("/css/style.css")).lastModified() %>">
 </head>
 <body>
 <div class="contenedor-login">
-    <h1>Estacionamiento Inteligente</h1>
+    <h1>Estacionamiento</h1>
     <form id="formLogin">
         <label>Usuario</label>
         <input type="text" name="usuario" id="usuario" required>
@@ -18,7 +18,7 @@
         <p id="mensajeError" class="error"></p>
     </form>
 </div>
-<script src="js/main.js"></script>
+<script src="js/main.js?v=<%= new java.io.File(application.getRealPath("/js/main.js")).lastModified() %>"></script>
 <script>
 document.getElementById('formLogin').addEventListener('submit', function (e) {
     e.preventDefault();

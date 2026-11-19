@@ -15,14 +15,12 @@ public class VehiculoDAOImpl implements VehiculoDAO {
 
     @Override
     public void insertar(Vehiculo vehiculo) throws SQLException {
-        String sql = "INSERT INTO vehiculo (placa, marca, modelo, color, id_tipo) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO vehiculo (placa, marca, id_tipo) VALUES (?, ?, ?)";
         try (Connection con = ConexionBD.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, vehiculo.getPlaca());
             ps.setString(2, vehiculo.getMarca());
-            ps.setString(3, vehiculo.getModelo());
-            ps.setString(4, vehiculo.getColor());
-            ps.setInt(5, vehiculo.getIdTipo());
+            ps.setInt(3, vehiculo.getIdTipo());
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
@@ -34,15 +32,13 @@ public class VehiculoDAOImpl implements VehiculoDAO {
 
     @Override
     public void actualizar(Vehiculo vehiculo) throws SQLException {
-        String sql = "UPDATE vehiculo SET placa=?, marca=?, modelo=?, color=?, id_tipo=? WHERE id_vehiculo=?";
+        String sql = "UPDATE vehiculo SET placa=?, marca=?, id_tipo=? WHERE id_vehiculo=?";
         try (Connection con = ConexionBD.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, vehiculo.getPlaca());
             ps.setString(2, vehiculo.getMarca());
-            ps.setString(3, vehiculo.getModelo());
-            ps.setString(4, vehiculo.getColor());
-            ps.setInt(5, vehiculo.getIdTipo());
-            ps.setInt(6, vehiculo.getIdVehiculo());
+            ps.setInt(3, vehiculo.getIdTipo());
+            ps.setInt(4, vehiculo.getIdVehiculo());
             ps.executeUpdate();
         }
     }
@@ -103,8 +99,6 @@ public class VehiculoDAOImpl implements VehiculoDAO {
         v.setIdVehiculo(rs.getInt("id_vehiculo"));
         v.setPlaca(rs.getString("placa"));
         v.setMarca(rs.getString("marca"));
-        v.setModelo(rs.getString("modelo"));
-        v.setColor(rs.getString("color"));
         v.setIdTipo(rs.getInt("id_tipo"));
         return v;
     }

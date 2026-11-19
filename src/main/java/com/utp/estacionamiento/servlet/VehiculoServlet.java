@@ -2,9 +2,11 @@ package com.utp.estacionamiento.servlet;
 
 import com.google.gson.Gson;
 import com.utp.estacionamiento.util.GsonProvider;
-import com.utp.estacionamiento.dao.VehiculoDAO;
-import com.utp.estacionamiento.dao.VehiculoDAOImpl;
+import com.utp.estacionamiento.modelo.EspacioEstacionamiento;
+import com.utp.estacionamiento.modelo.Ticket;
 import com.utp.estacionamiento.modelo.Vehiculo;
+import com.utp.estacionamiento.servicio.EstacionamientoService;
+import com.utp.estacionamiento.util.AppContextListener;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,17 +17,48 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Demuestra el CRUD completo (Crear, Leer, Actualizar, Eliminar) con patron DAO. */
+/**
+ * Registro de vehiculos (crear, listar y actualizar) con patron DAO.
+ * No se eliminan: el historial de tickets y pagos depende de cada vehiculo.
+ * Los cambios pasan por EstacionamientoService para que el Arbol AVL
+ * quede sincronizado con la base de datos.
+ */
 public class VehiculoServlet extends HttpServlet {
 
-    private final VehiculoDAO vehiculoDAO = new VehiculoDAOImpl();
+    private static final int MYSQL_DUPLICADO = 1062;
+
     private final Gson gson = GsonProvider.gson();
+
+    private EstacionamientoService servicio() {
+        return (EstacionamientoService) getServletContext().getAttribute(AppContextListener.ATRIBUTO_SERVICIO);
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> respuesta = new HashMap<>();
         try {
-            respuesta.put("vehiculos", vehiculoDAO.listarTodos());
+            respuesta.put("vehiculos", servicio().getVehiculoDAO().listarTodos());
+            // Vehiculos que estan dentro: idVehiculo -> numero de ticket, espacio y hora de entrada
+            Map<Integer, Map<String, Object>> activos = new HashMap<>();
+            for (Ticket t : servicio().listarTicketsActivos()) {
+                Map<String, Object> dato = new HashMap<>();
+                dato.put("idTicket", t.getIdTicket());
+                EspacioEstacionamiento e = servicio().getMatriz().buscarPorId(t.getIdEspacio());
+                dato.put("numeroEspacio", e != null ? e.getNumeroEspacio() : null);
+                dato.put("entrada", t.getFechaHoraEntrada());
+                activos.put(t.getIdVehiculo(), dato);
+            }
+            respuesta.put("activos", activos);
+            // Ultima visita finalizada por vehiculo: idVehiculo -> hora de entrada y salida
+            Map<Integer, Map<String, Object>> ultimasVisitas = new HashMap<>();
+            for (Map.Entry<Integer, Ticket> entrada : servicio().ultimasVisitasFinalizadas().entrySet()) {
+                Ticket t = entrada.getValue();
+                Map<String, Object> dato = new HashMap<>();
+                dato.put("entrada", t.getFechaHoraEntrada());
+                dato.put("salida", t.getFechaHoraSalida());
+                ultimasVisitas.put(entrada.getKey(), dato);
+            }
+            respuesta.put("ultimasVisitas", ultimasVisitas);
         } catch (SQLException e) {
             respuesta.put("error", e.getMessage());
         }
@@ -41,32 +74,17 @@ public class VehiculoServlet extends HttpServlet {
         try {
             switch (accion) {
                 case "crear": {
-                    Vehiculo v = new Vehiculo();
-                    v.setPlaca(req.getParameter("placa").toUpperCase());
-                    v.setMarca(req.getParameter("marca"));
-                    v.setModelo(req.getParameter("modelo"));
-                    v.setColor(req.getParameter("color"));
-                    v.setIdTipo(Integer.parseInt(req.getParameter("idTipo")));
-                    vehiculoDAO.insertar(v);
+                    servicio().crearVehiculo(leerVehiculo(req));
                     respuesta.put("exito", true);
+                    respuesta.put("mensaje", "Vehiculo agregado.");
                     break;
                 }
                 case "actualizar": {
-                    Vehiculo v = new Vehiculo();
+                    Vehiculo v = leerVehiculo(req);
                     v.setIdVehiculo(Integer.parseInt(req.getParameter("idVehiculo")));
-                    v.setPlaca(req.getParameter("placa").toUpperCase());
-                    v.setMarca(req.getParameter("marca"));
-                    v.setModelo(req.getParameter("modelo"));
-                    v.setColor(req.getParameter("color"));
-                    v.setIdTipo(Integer.parseInt(req.getParameter("idTipo")));
-                    vehiculoDAO.actualizar(v);
+                    servicio().actualizarVehiculo(v);
                     respuesta.put("exito", true);
-                    break;
-                }
-                case "eliminar": {
-                    int id = Integer.parseInt(req.getParameter("idVehiculo"));
-                    vehiculoDAO.eliminar(id);
-                    respuesta.put("exito", true);
+                    respuesta.put("mensaje", "Vehiculo actualizado.");
                     break;
                 }
                 default:
@@ -75,10 +93,27 @@ public class VehiculoServlet extends HttpServlet {
             }
         } catch (SQLException e) {
             respuesta.put("exito", false);
-            respuesta.put("mensaje", "Error de base de datos: " + e.getMessage());
+            if (e.getErrorCode() == MYSQL_DUPLICADO) {
+                respuesta.put("mensaje", "Ya existe un vehiculo con esa placa.");
+            } else {
+                respuesta.put("mensaje", "Error de base de datos: " + e.getMessage());
+            }
         }
 
         resp.setContentType("application/json;charset=UTF-8");
         resp.getWriter().write(gson.toJson(respuesta));
+    }
+
+    private Vehiculo leerVehiculo(HttpServletRequest req) {
+        Vehiculo v = new Vehiculo();
+        v.setPlaca(req.getParameter("placa").trim().toUpperCase());
+        v.setMarca(opcional(req.getParameter("marca")));
+        v.setIdTipo(Integer.parseInt(req.getParameter("idTipo")));
+        return v;
+    }
+
+    /** La marca es opcional: si llega vacia se guarda como NULL. */
+    private static String opcional(String valor) {
+        return (valor == null || valor.trim().isEmpty()) ? null : valor.trim();
     }
 }

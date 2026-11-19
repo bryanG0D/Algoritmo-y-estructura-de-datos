@@ -20,6 +20,30 @@ public class SalidaServlet extends HttpServlet {
 
     private final Gson gson = GsonProvider.gson();
 
+    /** Consulta previa al cobro: ?consulta=<numero de ticket o placa>. No cobra nada. */
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Map<String, Object> respuesta = new HashMap<>();
+        try {
+            EstacionamientoService servicio = (EstacionamientoService)
+                    getServletContext().getAttribute(AppContextListener.ATRIBUTO_SERVICIO);
+            String consulta = req.getParameter("consulta");
+            EstacionamientoService.DetalleTicket d =
+                    (consulta == null || consulta.trim().isEmpty()) ? null : servicio.consultarTicketActivo(consulta);
+            if (d == null) {
+                respuesta.put("encontrado", false);
+                respuesta.put("mensaje", "No hay ningun vehiculo dentro con ese ticket o placa.");
+            } else {
+                respuesta.put("encontrado", true);
+                respuesta.put("ticket", d);
+            }
+        } catch (SQLException e) {
+            respuesta.put("error", "Error de base de datos: " + e.getMessage());
+        }
+        resp.setContentType("application/json;charset=UTF-8");
+        resp.getWriter().write(gson.toJson(respuesta));
+    }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> respuesta = new HashMap<>();

@@ -39,7 +39,7 @@ ProyectoEstacionamiento/
 |---|---|---|
 | 1 | Documentacion (empresa, problematica, objetivos, alcance, requerimientos) | Pendiente |
 | 2 | Diagrama E-R | Hecho y aprobado (`docs/diagramas/`) |
-| 3 | Diagrama de clases UML | Pendiente |
+| 3 | Diagrama de clases UML | Hecho (`docs/entregables/diagrama-clases.drawio`, abrir con draw.io) |
 | 4 | Modelo relacional MySQL | Hecho en el script. Para la imagen: MySQL Workbench > Database > Reverse Engineer |
 | 5 | Script SQL con 20+ filas por tabla y procedimientos | Hecho (`database/`). `tipo_vehiculo` tiene solo 3 filas a proposito: Auto / Camioneta, Moto y Bicicleta (se cobra segun el espacio; el profesor acepta menos filas si los datos tienen sentido) |
 | 6 | CRUD | Hecho (pantalla Vehiculos) |
@@ -60,11 +60,8 @@ profesor pregunta a todos sobre el codigo, asi que todos deben entenderlo.
    notepad src\main\resources\db.properties
    ```
    Cambia `db.usuario` y `db.contrasena` por los tuyos. Guarda.
-3. **Usuario para entrar a la app.** En Workbench ejecuta:
-   ```
-   UPDATE estacionamiento_inteligente.usuario
-   SET contrasena_hash = 'admin123' WHERE usuario_login = 'carlos.ram1';
-   ```
+3. **Usuario para entrar a la app.** No hace falta nada: el script ya trae
+   los usuarios con la contrasena de demo `admin123` (guardada con BCrypt).
 4. **Abrir en NetBeans:** `File > Open Project` > esta carpeta.
 5. **Ejecutar:** F6. Luego abre `http://localhost:8080/login.jsp` y entra con
    `carlos.ram1` / `admin123`.

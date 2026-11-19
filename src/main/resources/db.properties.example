@@ -9,3 +9,10 @@
 db.url=jdbc:mysql://localhost:3306/estacionamiento_inteligente?useSSL=false&serverTimezone=America/Lima&allowPublicKeyRetrieval=true
 db.usuario=root
 db.contrasena=
+
+# --- Opcion nube (Aiven): comenta las 3 lineas de arriba y usa estas ---
+# Host, puerto y contrasena se piden al encargado del grupo (nunca en GitHub).
+# time_zone='-05:00' hace que las fechas se guarden en hora de Peru.
+#db.url=jdbc:mysql://HOST:PUERTO/estacionamiento_inteligente?sslMode=REQUIRED&serverTimezone=America/Lima&sessionVariables=time_zone='-05:00'
+#db.usuario=avnadmin
+#db.contrasena=

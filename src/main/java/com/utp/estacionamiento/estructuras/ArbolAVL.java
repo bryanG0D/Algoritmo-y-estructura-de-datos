@@ -87,15 +87,26 @@ public class ArbolAVL {
     }
 
     public Vehiculo buscarPorPlaca(String placa) {
+        return buscarConRecorrido(placa).getVehiculo();
+    }
+
+    /**
+     * Busca una placa bajando desde la raiz: en cada nodo compara y descarta
+     * la mitad del arbol (izquierda si la placa es menor, derecha si es mayor).
+     * Ademas registra cuantas comparaciones hizo y que nodos visito.
+     */
+    public ResultadoBusquedaAVL buscarConRecorrido(String placa) {
+        List<String> recorrido = new ArrayList<>();
         NodoAVL actual = raiz;
         while (actual != null) {
+            recorrido.add(actual.vehiculo.getPlaca());
             int cmp = placa.compareTo(actual.vehiculo.getPlaca());
             if (cmp == 0) {
-                return actual.vehiculo;
+                return new ResultadoBusquedaAVL(actual.vehiculo, recorrido.size(), recorrido);
             }
             actual = cmp < 0 ? actual.izquierdo : actual.derecho;
         }
-        return null;
+        return new ResultadoBusquedaAVL(null, recorrido.size(), recorrido);
     }
 
     public void eliminar(String placa) {
@@ -133,7 +144,18 @@ public class ArbolAVL {
         listarEnOrden(nodo.derecho, resultado);
     }
 
+    /** Cantidad de vehiculos en el arbol (cuenta los nodos recursivamente). */
     public int tamano() {
-        return listarEnOrden().size();
+        return contarNodos(raiz);
+    }
+
+    private int contarNodos(NodoAVL nodo) {
+        if (nodo == null) return 0;
+        return 1 + contarNodos(nodo.izquierdo) + contarNodos(nodo.derecho);
+    }
+
+    /** Altura del arbol: maximo de comparaciones que puede necesitar una busqueda. */
+    public int altura() {
+        return altura(raiz);
     }
 }
